@@ -1,0 +1,21 @@
+object frmDatePicker: TfrmDatePicker
+  Left = 361
+  Height = 240
+  Top = 163
+  Width = 320
+  BorderStyle = bsNone
+  Caption = 'frmDatePicker'
+  ClientHeight = 240
+  ClientWidth = 320
+  KeyPreview = True
+  OnKeyPress = FormKeyPress
+  Position = poDesktopCenter
+  LCLVersion = '0.9.30.4'
+  object Calendar: TCalendar
+    Left = 8
+    Height = 232
+    Top = 0
+    Width = 308
+    DateTime = 40988
+  end
+end

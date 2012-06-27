@@ -1,0 +1,25 @@
+object frmReminderList: TfrmReminderList
+  Left = 470
+  Height = 240
+  Top = 168
+  Width = 320
+  BorderStyle = bsNone
+  Caption = 'frmReminderList'
+  ClientHeight = 240
+  ClientWidth = 320
+  KeyPreview = True
+  OnKeyPress = FormKeyPress
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '0.9.30.4'
+  object lbxReminders: TListBox
+    Left = 8
+    Height = 224
+    Top = 8
+    Width = 304
+    ItemHeight = 0
+    ScrollWidth = 302
+    TabOrder = 0
+    TopIndex = -1
+  end
+end

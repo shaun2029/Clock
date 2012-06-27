@@ -1,0 +1,376 @@
+object frmClockSettings: TfrmClockSettings
+  Left = 511
+  Height = 240
+  Top = 198
+  Width = 320
+  BorderStyle = bsNone
+  Caption = 'Settings'
+  ClientHeight = 240
+  ClientWidth = 320
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
+  Position = poMainFormCenter
+  SessionProperties = 'cbxEnableReminders.Checked;cbxFri.Checked;cbxGetReminders.Checked;cbxMon.Checked;cbxPlayMusic.Checked;cbxSat.Checked;cbxSun.Checked;cbxThu.Checked;cbxTue.Checked;cbxWed.Checked;edtHour.Value;edtLocation1.Text;edtLocation2.Text;edtLocation3.Text;edtLocation.Text;edtMinute.Value;edtMusicPath.Text;edtRemHour.Value;edtRemMinute.Value;edtSleepPath.Text;cbxSilentAlarm.Checked'
+  LCLVersion = '0.9.30.4'
+  object PageControl1: TPageControl
+    Left = 8
+    Height = 216
+    Top = 8
+    Width = 304
+    ActivePage = TabSheet2
+    ParentFont = False
+    TabIndex = 0
+    TabOrder = 0
+    object TabSheet2: TTabSheet
+      Caption = 'Timer'
+      ClientHeight = 185
+      ClientWidth = 300
+      object stxtTimer: TStaticText
+        Left = 14
+        Height = 71
+        Top = 12
+        Width = 88
+        Alignment = taCenter
+        Caption = '10'
+        Font.Height = -43
+        ParentFont = False
+        TabOrder = 0
+      end
+      object udTimer: TUpDown
+        Left = 102
+        Height = 71
+        Top = 12
+        Width = 160
+        Associate = stxtTimer
+        Min = 0
+        Max = 180
+        Position = 10
+        TabOrder = 1
+        Wrap = False
+      end
+      object btnStartTimer: TButton
+        Left = 6
+        Height = 86
+        Top = 91
+        Width = 288
+        Caption = 'Start Timer'
+        Font.Height = -26
+        OnClick = btnStartTimerClick
+        ParentFont = False
+        TabOrder = 2
+      end
+    end
+    object TabSheet1: TTabSheet
+      Caption = 'Alarm'
+      ClientHeight = 185
+      ClientWidth = 300
+      object Label2: TLabel
+        Left = 46
+        Height = 18
+        Top = 27
+        Width = 78
+        Caption = 'Alarm Time'
+        ParentColor = False
+      end
+      object edtHour: TSpinEdit
+        Left = 134
+        Height = 27
+        Top = 27
+        Width = 50
+        MaxValue = 23
+        ParentFont = False
+        TabOrder = 0
+        Value = 12
+      end
+      object edtMinute: TSpinEdit
+        Left = 198
+        Height = 27
+        Top = 27
+        Width = 50
+        MaxValue = 59
+        ParentFont = False
+        TabOrder = 1
+        Value = 22
+      end
+      object Label3: TLabel
+        Left = 14
+        Height = 18
+        Top = 91
+        Width = 33
+        Caption = 'Days'
+        ParentColor = False
+      end
+      object cbxMon: TCheckBox
+        Left = 62
+        Height = 24
+        Top = 91
+        Width = 39
+        Caption = 'M'
+        TabOrder = 2
+      end
+      object cbxTue: TCheckBox
+        Left = 102
+        Height = 24
+        Top = 91
+        Width = 34
+        Caption = 'T'
+        TabOrder = 3
+      end
+      object cbxWed: TCheckBox
+        Left = 145
+        Height = 24
+        Top = 91
+        Width = 40
+        Caption = 'W'
+        TabOrder = 4
+      end
+      object cbxThu: TCheckBox
+        Left = 190
+        Height = 24
+        Top = 91
+        Width = 34
+        Caption = 'T'
+        TabOrder = 5
+      end
+      object cbxFri: TCheckBox
+        Left = 230
+        Height = 24
+        Top = 91
+        Width = 34
+        Caption = 'F'
+        TabOrder = 6
+      end
+      object cbxSun: TCheckBox
+        Left = 190
+        Height = 24
+        Top = 115
+        Width = 74
+        Caption = 'Sunday'
+        TabOrder = 8
+      end
+      object cbxSat: TCheckBox
+        Left = 62
+        Height = 24
+        Top = 115
+        Width = 86
+        Caption = 'Saturday'
+        TabOrder = 7
+      end
+      object cbxSilentAlarm: TCheckBox
+        Left = 14
+        Height = 24
+        Top = 147
+        Width = 191
+        Caption = 'Play Music (Silent Alarm)'
+        TabOrder = 9
+      end
+    end
+    object TabSheet4: TTabSheet
+      Caption = 'Reminders'
+      ClientHeight = 185
+      ClientWidth = 300
+      object Label5: TLabel
+        Left = 22
+        Height = 18
+        Top = 27
+        Width = 102
+        Caption = 'Reminder Time'
+        ParentColor = False
+      end
+      object edtRemHour: TSpinEdit
+        Left = 134
+        Height = 27
+        Top = 27
+        Width = 50
+        MaxValue = 23
+        ParentFont = False
+        TabOrder = 0
+        Value = 12
+      end
+      object edtRemMinute: TSpinEdit
+        Left = 198
+        Height = 27
+        Top = 27
+        Width = 50
+        MaxValue = 59
+        ParentFont = False
+        TabOrder = 1
+        Value = 22
+      end
+      object cbxEnableReminders: TCheckBox
+        Left = 22
+        Height = 24
+        Top = 75
+        Width = 143
+        Caption = 'Enable reminders'
+        Checked = True
+        State = cbChecked
+        TabOrder = 2
+      end
+      object cbxGetReminders: TCheckBox
+        Left = 22
+        Height = 24
+        Top = 107
+        Width = 217
+        Caption = 'Fetch reminders from server'
+        TabOrder = 3
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'Music'
+      ClientHeight = 185
+      ClientWidth = 300
+      object edtMusicPath: TEdit
+        Left = 110
+        Height = 27
+        Top = 27
+        Width = 184
+        TabOrder = 0
+        Text = '/home/user/Music'
+      end
+      object Label9: TLabel
+        Left = 14
+        Height = 42
+        Top = 27
+        Width = 88
+        AutoSize = False
+        Caption = 'Music Path:'
+        ParentColor = False
+        WordWrap = True
+      end
+      object edtSleepPath: TEdit
+        Left = 110
+        Height = 27
+        Top = 91
+        Width = 184
+        TabOrder = 1
+        Text = '/home/user/Sleep'
+      end
+      object Label10: TLabel
+        Left = 14
+        Height = 42
+        Top = 83
+        Width = 88
+        AutoSize = False
+        Caption = 'Sleep Music Path:'
+        ParentColor = False
+        WordWrap = True
+      end
+      object cbxPlayMusic: TCheckBox
+        Left = 110
+        Height = 24
+        Top = 139
+        Width = 175
+        Caption = 'Play music after alarm'
+        TabOrder = 2
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = 'Weather'
+      ClientHeight = 185
+      ClientWidth = 300
+      object edtLocation: TEdit
+        Left = 110
+        Height = 27
+        Hint = 'Location code from metoffice.co.gov/mobile'
+        Top = 19
+        Width = 158
+        Font.Height = -13
+        Font.Name = 'Sans'
+        ParentFont = False
+        TabOrder = 0
+        Text = '350928'
+      end
+      object edtLocation1: TEdit
+        Left = 110
+        Height = 27
+        Hint = 'Location code from metoffice.co.gov/mobile'
+        Top = 51
+        Width = 158
+        Font.Height = -13
+        Font.Name = 'Sans'
+        ParentFont = False
+        TabOrder = 1
+        Text = '350928'
+      end
+      object edtLocation2: TEdit
+        Left = 110
+        Height = 27
+        Hint = 'Location code from metoffice.co.gov/mobile'
+        Top = 83
+        Width = 158
+        Font.Height = -13
+        Font.Name = 'Sans'
+        ParentFont = False
+        TabOrder = 2
+        Text = '350928'
+      end
+      object edtLocation3: TEdit
+        Left = 110
+        Height = 27
+        Hint = 'Location code from metoffice.co.gov/mobile'
+        Top = 115
+        Width = 158
+        Font.Height = -13
+        Font.Name = 'Sans'
+        ParentFont = False
+        TabOrder = 3
+        Text = '350928'
+      end
+      object Label4: TLabel
+        Left = 22
+        Height = 16
+        Top = 155
+        Width = 246
+        Caption = 'Location code from metoffice.gov.uk/mobile'
+        Font.Height = -12
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label1: TLabel
+        Left = 14
+        Height = 18
+        Top = 19
+        Width = 71
+        Caption = 'Location 1'
+        ParentColor = False
+      end
+      object Label6: TLabel
+        Left = 14
+        Height = 18
+        Top = 51
+        Width = 71
+        Caption = 'Location 2'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 14
+        Height = 18
+        Top = 83
+        Width = 71
+        Caption = 'Location 3'
+        ParentColor = False
+      end
+      object Label8: TLabel
+        Left = 14
+        Height = 18
+        Top = 115
+        Width = 71
+        Caption = 'Location 4'
+        ParentColor = False
+      end
+    end
+  end
+  object XMLPropStorage1: TXMLPropStorage
+    StoredValues = <>
+    left = 208
+    top = 187
+  end
+  object tmrSettings: TTimer
+    Interval = 200
+    OnTimer = tmrSettingsTimer
+    left = 240
+    top = 187
+  end
+end

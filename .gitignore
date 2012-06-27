@@ -1,0 +1,14 @@
+# Compiled binaries
+*.o
+*.s
+*.ppu
+
+# Backup files
+*.bak
+*.~*
+
+# generated files
+arm/
+i386/
+lib/
+

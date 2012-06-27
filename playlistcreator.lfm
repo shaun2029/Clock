@@ -1,0 +1,26 @@
+object frmPlaylist: TfrmPlaylist
+  Left = 405
+  Height = 240
+  Top = 194
+  Width = 320
+  BorderStyle = bsNone
+  Caption = 'frmPlaylist'
+  ClientHeight = 240
+  ClientWidth = 320
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  Position = poMainFormCenter
+  LCLVersion = '0.9.30.4'
+  object lstDisplay: TListBox
+    Left = 8
+    Height = 224
+    Top = 8
+    Width = 304
+    ItemHeight = 0
+    ScrollWidth = 302
+    TabOrder = 0
+    TopIndex = -1
+  end
+end
