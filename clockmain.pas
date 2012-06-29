@@ -17,7 +17,7 @@ uses
   Music, Sync, Process, MusicPlayer, PlaylistCreator, UDPCommandServer;
 
 const
-  VERSION = '1.0.9';
+  VERSION = '1.0.10';
 
 type
 
@@ -446,7 +446,7 @@ begin
     Application.ProcessMessages;
   end;
 
-  FWeatherReport := mmoHTML.Caption + LineEnding + FWeatherReport;
+  FWeatherReport := labLocation.Caption + LineEnding + mmoHTML.Caption;
   tmrWeather.Enabled := True;
 end;
 
