@@ -26,6 +26,8 @@ type
     FPort: integer;
     FPlaying: string;
     FWeatherReport: string;
+    FWeatherReports: array [0..4] of string;
+    FImageURLs: array [0..4] of string;
 
     procedure SetPlaying(const AValue: string);
     procedure SetWeatherReport(const AValue: string);
@@ -36,6 +38,9 @@ type
     procedure Execute; override;
   public
     function GetCommnd: TRemoteCommand;
+
+    procedure SetImageURLs(URLs: array of string);
+    procedure SetWeatherReports(Reports: array of string);
 
     constructor Create(Port: integer);
     destructor Destroy; override;
@@ -51,6 +56,9 @@ type
     procedure SetWeatherReport(const AValue: string);
   public
     function GetCommand: TRemoteCommand;
+
+    procedure SetImageURLs(URLs: array of string);
+    procedure SetWeatherReports(Reports: array of string);
 
     constructor Create(Port: integer);
     destructor Destroy; override;
@@ -76,6 +84,16 @@ end;
 function TCOMServer.GetCommand: TRemoteCommand;
 begin
   Result := FCOMServerThread.GetCommnd;
+end;
+
+procedure TCOMServer.SetImageURLs(URLs: array of string);
+begin
+  FCOMServerThread.SetImageURLs(URLs);
+end;
+
+procedure TCOMServer.SetWeatherReports(Reports: array of string);
+begin
+  FCOMServerThread.SetWeatherReports(Reports);
 end;
 
 constructor TCOMServer.Create(Port: integer);
@@ -111,6 +129,36 @@ begin
   FCritical.Leave;
 end;
 
+procedure TCOMServerThread.SetImageURLs(URLs: array of string);
+var
+  i: Integer;
+begin
+  FCritical.Enter;
+
+  for i := 0 to High(URLs) do
+  begin
+    if i <= High(FImageURLs) then
+      FImageURLs[i] := URLs[i];
+  end;
+
+  FCritical.Leave;
+end;
+
+procedure TCOMServerThread.SetWeatherReports(Reports: array of string);
+var
+  i: Integer;
+begin
+  FCritical.Enter;
+
+  for i := 0 to High(Reports) do
+  begin
+    if i <= High(FWeatherReports) then
+      FWeatherReports[i] := Reports[i];
+  end;
+
+  FCritical.Leave;
+end;
+
 procedure TCOMServerThread.Execute;
 var
   Socket: TUDPBlockSocket;
@@ -118,7 +166,6 @@ var
   Size: Integer;
   i: Integer;
   DataBuff: string;
-  Pos: integer;
   Total: integer;
   PakNo: integer;
 begin
@@ -185,6 +232,20 @@ begin
           begin
             FCritical.Enter;
             Socket.SendString(FWeatherReport);
+            FCritical.Leave;
+          end
+          else if (Pos('CLOCK:WEATHER:', Buffer) = 1)
+            and (Length(Buffer) = 15) then
+          begin
+            FCritical.Enter;
+            Socket.SendString(FWeatherReports[StrToIntDef(Buffer[15], 0)]);
+            FCritical.Leave;
+          end
+          else if (Pos('CLOCK:WEATHERIMAGE:', Buffer) = 1)
+            and (Length(Buffer) = 20) then
+          begin
+            FCritical.Enter;
+            Socket.SendString(FImageURLs[StrToIntDef(Buffer[20], 0)]);
             FCritical.Leave;
           end;
         end;

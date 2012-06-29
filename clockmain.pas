@@ -80,6 +80,7 @@ type
     FSyncClient: TSyncClient;
 
     Images: array [0..4] of TImage;
+    ImageURLs: array [0..4] of string;
     Labels: array [0..9] of TLabel;
     DayLabels: array[0..4] of TLabel;
     WindLabels: array[0..4] of TLabel;
@@ -91,6 +92,7 @@ type
 
     FCOMServer: TCOMServer;
     FWeatherReport: string;
+    FWeatherReports: array [0..4] of string;
 
     procedure CloseApp;
     procedure ConfigureWifi;
@@ -281,6 +283,9 @@ begin
   begin
     FCOMServer.Playing := LabSong.Caption;
     FCOMServer.WeatherReport := FWeatherReport;
+    FCOMServer.SetImageURLs(ImageURLs);
+    FCOMServer.SetWeatherReports(FWeatherReports);
+
     Command := FCOMServer.GetCommand;
 
     case Command of
@@ -405,7 +410,7 @@ begin
     try
       if FMetOffice.GetForecast('http://www.metoffice.gov.uk/mobile/',
         '5dayforecastdetail?forecastid=' + Trim(Locations[FCurrentLocation]),
-        i, Forecast, Images) then
+        i, Forecast, Images, ImageURLs) then
       begin
         if i = 0 then
         begin
@@ -418,7 +423,7 @@ begin
         Labels[(i*2) + 1].Caption := IntToStr(Forecast.TempNight) + '°C';
         WindLabels[i].Caption := IntToStr(Forecast.WindSpeedDay) + 'mph';
 
-        FWeatherReport := FWeatherReport + Format('%s %d°C (%d°C) %dmph' + LineEnding,
+        FWeatherReports[i] := Format('%s %d°C (%d°C) %dmph',
           [Forecast.Day, Forecast.TempDay, Forecast.TempNight, Forecast.WindSpeedDay]);
       end
       else

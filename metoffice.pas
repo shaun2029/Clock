@@ -50,7 +50,7 @@ type
     ErrorMessage: string;
 
     function GetForecast(BaseURL, PageURL: string; Day: integer;
-      out Forecast: TWeatherReport; Images: array of TImage): boolean;
+      out Forecast: TWeatherReport; Images: array of TImage; var ImageURLs: array of string): boolean;
 
     function GetLocation(BaseURL, PageURL: string; out Location: string): boolean;
 
@@ -163,7 +163,8 @@ begin
 end;
 
 function TMetOffice.GetForecast(BaseURL, PageURL: string;
-  Day: integer; out Forecast: TWeatherReport; Images: array of TImage): boolean;
+  Day: integer; out Forecast: TWeatherReport;
+  Images: array of TImage; var ImageURLs: array of string): boolean;
 var
   Connection: THTTPSend;
   XMLResponse: TXMLDocument;
@@ -259,7 +260,11 @@ begin
           if GetForecastImage(Node, i, ImageURL) then
           begin
             RequestURL := BaseURL + ImageURL;
-            //RequestURL := 'http://www.exif.org/samples/thumbs/sanyo-vpcg250.jpg';
+
+            // If there is an element avaliable fill it with the image URL
+            if i <= High(ImageURLs) then
+              ImageURLs[i] := RequestURL;
+
             RequestURL := EncodeURL(RequestURL);
 
             Connection.Document.Clear;
