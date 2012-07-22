@@ -79,8 +79,6 @@ begin
 end;
 
 procedure TFindFilesThread.Execute;
-var
-  total: integer;
 begin
   FindFiles(FFileList, FPathList, FSearchPath, FExtension);
   FFileList.Sort;

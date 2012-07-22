@@ -29,6 +29,7 @@ type
     FWeatherReports: array [0..4] of string;
     FImageURLs: array [0..4] of string;
 
+    procedure Log(Message: string);
     procedure SetPlaying(const AValue: string);
     procedure SetWeatherReport(const AValue: string);
   protected
@@ -163,100 +164,97 @@ procedure TCOMServerThread.Execute;
 var
   Socket: TUDPBlockSocket;
   Buffer: string;
-  Size: Integer;
-  i: Integer;
-  DataBuff: string;
-  Total: integer;
-  PakNo: integer;
 begin
   Socket := TUDPBlockSocket.Create;
   try
     Socket.Bind('0.0.0.0', IntToStr(FPort));
-    try
-      if Socket.LastError <> 0 then
-      begin
-        raise Exception.CreateFmt('Bind failed with error code %d', [Socket.LastError]);
-        Exit;
-      end;
 
-      while not Terminated do
-      begin
-        // wait one second for new packet
-        Buffer := Socket.RecvPacket(1000);
-
-        if Socket.LastError = 0 then
+    if Socket.LastError <> 0 then
+    begin
+      Log(Format('Bind failed with error code %d', [Socket.LastError]));
+      while not Terminated do Sleep(100);
+    end
+    else
+    begin
+      try
+        while not Terminated do
         begin
-          if Buffer = 'CLOCK:NEXT' then
+          // wait one second for new packet
+          Buffer := Socket.RecvPacket(1000);
+
+          if Socket.LastError = 0 then
           begin
-            FCritical.Enter;
-            FCommand := rcomNext;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:MUSIC' then
-          begin
-            FCritical.Enter;
-            FCommand := rcomMusic;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:SLEEP' then
-          begin
-            FCritical.Enter;
-            FCommand := rcomSleep;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:PAUSE' then
-          begin
-            FCritical.Enter;
-            FCommand := rcomPause;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:VOLUP' then
-          begin
-            FCritical.Enter;
-            FCommand := rcomVolumeUp;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:VOLDOWN' then
-          begin
-            FCritical.Enter;
-            FCommand := rcomVolumeDown;
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:PLAYING' then
-          begin
-            FCritical.Enter;
-            Socket.SendString(FPlaying);
-            FCritical.Leave;
-          end
-          else if Buffer = 'CLOCK:WEATHER' then
-          begin
-            FCritical.Enter;
-            Socket.SendString(FWeatherReport);
-            FCritical.Leave;
-          end
-          else if (Pos('CLOCK:WEATHER:', Buffer) = 1)
-            and (Length(Buffer) = 15) then
-          begin
-            FCritical.Enter;
-            Socket.SendString(FWeatherReports[StrToIntDef(Buffer[15], 0)]);
-            FCritical.Leave;
-          end
-          else if (Pos('CLOCK:WEATHERIMAGE:', Buffer) = 1)
-            and (Length(Buffer) = 20) then
-          begin
-            FCritical.Enter;
-            Socket.SendString(FImageURLs[StrToIntDef(Buffer[20], 0)]);
-            FCritical.Leave;
+            if Buffer = 'CLOCK:NEXT' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomNext;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:MUSIC' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomMusic;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:SLEEP' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomSleep;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:PAUSE' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomPause;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:VOLUP' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomVolumeUp;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:VOLDOWN' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomVolumeDown;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:PLAYING' then
+            begin
+              FCritical.Enter;
+              Socket.SendString(FPlaying);
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:WEATHER' then
+            begin
+              FCritical.Enter;
+              Socket.SendString(FWeatherReport);
+              FCritical.Leave;
+            end
+            else if (Pos('CLOCK:WEATHER:', Buffer) = 1)
+              and (Length(Buffer) = 15) then
+            begin
+              FCritical.Enter;
+              Socket.SendString(FWeatherReports[StrToIntDef(Buffer[15], 0)]);
+              FCritical.Leave;
+            end
+            else if (Pos('CLOCK:WEATHERIMAGE:', Buffer) = 1)
+              and (Length(Buffer) = 20) then
+            begin
+              FCritical.Enter;
+              Socket.SendString(FImageURLs[StrToIntDef(Buffer[20], 0)]);
+              FCritical.Leave;
+            end;
           end;
+
+          // minimal sleep
+          if Buffer = '' then
+            Sleep(10);
         end;
-
-        // minimal sleep
-        if Buffer = '' then
-          Sleep(10);
+      finally
+        Socket.CloseSocket;
       end;
-
-    finally
-      Socket.CloseSocket;
     end;
   finally
     Socket.Free;
@@ -287,6 +285,11 @@ begin
   FCritical.Free;
 
   inherited Destroy;
+end;
+
+procedure TCOMServerThread.Log(Message: string);
+begin
+  DebugLn(Self.ClassName + #9#9 + Message);
 end;
 
 end.

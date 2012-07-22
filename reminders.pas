@@ -1,3 +1,8 @@
+//
+// Copyright 2012 Shaun Simpson
+// shauns2029@gmail.com
+//
+
 unit Reminders;
 
 {$mode objfpc}{$H+}
@@ -5,8 +10,8 @@ unit Reminders;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtDlgs,
-  StdCtrls, EditBtn, Calendar, ExtCtrls, DatePicker, IniFiles, LCLProc;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, EditBtn, ExtCtrls, DatePicker, IniFiles, LCLProc;
 
 type
 
@@ -241,15 +246,11 @@ function TfrmReminders.GetCurrentReminders: TReminders;
 var
   i: Integer;
   CurrDate: TDateTime;
-  EventDate: TDateTime;
-  EventIndex: integer;
 begin
   SetLength(Result, 0);
 
   // Get event for next second onward
   CurrDate := Date;
-  EventDate := Date - 1;
-  EventIndex := -1;
 
   for i := 0 to Length(FReminders) - 1 do
   begin

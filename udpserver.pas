@@ -20,6 +20,8 @@ type
   { TUDPServerThread }
 
   TUDPServerThread = class(TThread)
+  private
+    procedure Log(Message: string);
   protected
     FData: TStringList;
 
@@ -78,8 +80,6 @@ procedure TUDPServerThread.Execute;
 var
   Socket: TUDPBlockSocket;
   Buffer: string;
-  Size: Integer;
-  i: Integer;
   DataBuff: string;
   Pos: integer;
   Total: integer;
@@ -88,50 +88,52 @@ begin
   Socket := TUDPBlockSocket.Create;
   try
     Socket.Bind('0.0.0.0', '44559');
-    try
-      if Socket.LastError <> 0 then
-      begin
-        raise Exception.CreateFmt('Bind failed with error code %d', [Socket.LastError]);
-        Exit;
-      end;
 
-      while not Terminated do
-      begin
-        // wait one second for new packet
-        Buffer := Socket.RecvPacket(1000);
-
-        if Socket.LastError = 0 then
+    if Socket.LastError <> 0 then
+    begin
+      Log(Format('Bind failed with error code %d', [Socket.LastError]));
+      while not Terminated do Sleep(100);
+    end
+    else
+    begin
+      try
+        while not Terminated do
         begin
-          if Buffer = 'REQUEST REMINDERS' then
+          // wait one second for new packet
+          Buffer := Socket.RecvPacket(1000);
+
+          if Socket.LastError = 0 then
           begin
-            Total := FData.Count;
-
-			      // Send packet with reminder total
-            Socket.SendString('REMINDERS:' + IntToStr(Total));
-
-            DataBuff := FData.Text;
-            Pos := 1;
-            PakNo := 1;
-            
-			      // Send the reminders in packets of <= 512 bytes
-            while Pos < Length(DataBuff) do
+            if Buffer = 'REQUEST REMINDERS' then
             begin
-              Buffer := 'REMPAK:' + IntToStr(PakNo) + ';' + Copy(DataBuff, Pos, 500);
+              Total := FData.Count;
 
-              Socket.SendString(Buffer);
-              Inc(Pos, 500);
-              Inc(PakNo);
+			        // Send packet with reminder total
+              Socket.SendString('REMINDERS:' + IntToStr(Total));
+
+              DataBuff := FData.Text;
+              Pos := 1;
+              PakNo := 1;
+
+			        // Send the reminders in packets of <= 512 bytes
+              while Pos < Length(DataBuff) do
+              begin
+                Buffer := 'REMPAK:' + IntToStr(PakNo) + ';' + Copy(DataBuff, Pos, 500);
+
+                Socket.SendString(Buffer);
+                Inc(Pos, 500);
+                Inc(PakNo);
+              end;
             end;
           end;
+
+          // minimal sleep
+          if Buffer = '' then
+            Sleep(10);
         end;
-
-        // minimal sleep
-        if Buffer = '' then
-          Sleep(10);
+      finally
+        Socket.CloseSocket;
       end;
-
-    finally
-      Socket.CloseSocket;
     end;
   finally
     Socket.Free;
@@ -151,6 +153,11 @@ begin
   FData.Free;
 
   inherited Destroy;
+end;
+
+procedure TUDPServerThread.Log(Message: string);
+begin
+  DebugLn(Self.ClassName + #9#9 + Message);
 end;
 
 end.

@@ -36,6 +36,7 @@ type
     FURL: string;
     FXMLResponseTime: TDateTime;
     FTitle: string;
+    FWeatherDataValid: boolean;
 
     function FindAttribute(Node: TDOMNode; Name: string): TDOMNode;
     function FindNodeByAttribute(Node: TDOMNode; Index: integer; Name, Value: string): TDOMNode;
@@ -55,7 +56,7 @@ type
     function GetLocation(BaseURL, PageURL: string; out Location: string): boolean;
 
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override;
   published
 
   end;
@@ -63,8 +64,6 @@ type
 implementation
 
 constructor TMetOffice.Create;
-var
-  i: integer;
 begin
   inherited Create;
 
@@ -72,11 +71,11 @@ begin
   ErrorMessage := '';
   FURL := '';
   FTitle := '';
+
+  FWeatherDataValid := False;
 end;
 
 destructor TMetOffice.Destroy;
-var
-  i: Integer;
 begin
   inherited Destroy;
 end;
@@ -86,15 +85,8 @@ var
   Connection: THTTPSend;
   XMLResponse: TXMLDocument;
   RequestURL: string;
-  Node: TDOMNode;
-  Nodes: TDOMNodeList;
-  Found: boolean;
-  URL, ImageURL: string;
-  ImStr: string;
-  Name, Value: string;
+  URL: string;
   TextContent: string;
-  Temp: string;
-  i: integer;
 begin
   Result := False;
 
@@ -170,21 +162,18 @@ var
   XMLResponse: TXMLDocument;
   RequestURL: string;
   Node: TDOMNode;
-  Nodes: TDOMNodeList;
-  Found: boolean;
   URL, ImageURL: string;
-  ImStr: string;
-  Name, Value: string;
   TextContent: string;
-  Temp: string;
   i: integer;
 begin
-  Result := True;
+  Result := FWeatherDataValid;
 
   URL := BaseURL + PageURL;
 
   if (FURL <> URL) or (Now > FXMLResponseTime + EncodeTime(0, 15, 0, 0)) then
   begin
+    Result := True;
+
     FXMLResponseTime := Now;
     FURL := URL;
 
@@ -227,9 +216,22 @@ begin
             Log('Exception getting weather from MetOffice');
             Log(E.Message);
             Result := False;
+
+            // Weather data is no longer valid
+            FWeatherDataValid := False;
             Exit;
           end;
         end;
+      end
+      else
+      begin
+        ErrorMessage := 'Failed to get weather from MetOffice';
+        Log(ErrorMessage);
+        Result := False;
+
+        // Weather data is no longer valid
+        FWeatherDataValid := False;
+        Exit;
       end;
 
       Forecast.Title := 'Unknown Location';
@@ -292,6 +294,8 @@ begin
       ForeCast := FReports[Day]
     else Result := False
   end;
+
+  FWeatherDataValid := Result;
 end;
 
 
@@ -299,7 +303,7 @@ function TMetOffice.GetDayTemp(Report: TStringList; var Temp: integer): boolean;
 var
   TempStr, TempStr2: string;
   StartTemp, EndTemp: integer;
-  i, j: Integer;
+  i: Integer;
   Values: string;
 begin
   Result := False;
@@ -340,7 +344,6 @@ end;
 function TMetOffice.GetNightTemp(Report: TStringList; var Temp: integer): boolean;
 var
   TempStr, TempStr2, Values: string;
-  StartTemp, EndTemp: integer;
   i: Integer;
 begin
   Result := False;
@@ -370,6 +373,7 @@ begin
       Log('Exception getting night temperature');
       Log(E.Message);
 
+      Values := '';
       for i := 1 to Length(TempStr2) do
       begin
         Values := Values + ', "' + TempStr2[i] + '" ' + IntToStr(Integer(TempStr2[i]));
@@ -384,7 +388,6 @@ end;
 function TMetOffice.GetDayWindSpeed(Report: TStringList; var Temp: integer): boolean;
 var
   TempStr: string;
-  StartTemp, EndTemp: integer;
   i: Integer;
 begin
   Result := False;
@@ -416,15 +419,7 @@ end;
 
 function TMetOffice.Get5DayForecast(Node: TDOMNode; Day: integer; var Report: TWeatherReport): boolean;
 var
-  Connection: THTTPSend;
-  RequestURL: string;
-  XMLResponse: TXMLDocument;
-  Found: boolean;
-  ImageURL: string;
-  ImStr: string;
-  Name, Value: string;
-  TextContent: string;
-  i: integer;
+  Value: string;
   ReportData: TStringList;
   WeatherSymbols: TDOMNode;
 begin
@@ -501,16 +496,6 @@ end;
 
 function TMetOffice.GetForecastImage(Node: TDOMNode; Day: integer;
   var ImageURL: string): boolean;
-var
-  Connection: THTTPSend;
-  RequestURL: string;
-  XMLResponse: TXMLDocument;
-  Nodes: TDOMNodeList;
-  Found: boolean;
-  ImStr: string;
-  Name, Value: string;
-  TextContent: string;
-  i: integer;
 begin
   Result := False;
 

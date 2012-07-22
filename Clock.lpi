@@ -16,7 +16,7 @@
     <VersionInfo>
       <StringTable ProductVersion=""/>
     </VersionInfo>
-    <BuildModes Count="3" Active="arm">
+    <BuildModes Count="3" Active="i386">
       <Item1 Name="debug" Default="True"/>
       <Item2 Name="i386">
         <CompilerOptions>
@@ -130,12 +130,13 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="30">
+    <Units Count="32">
       <Unit0>
         <Filename Value="Clock.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Clock"/>
-        <EditorIndex Value="10"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="12"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="41" Y="17"/>
@@ -148,11 +149,10 @@
         <ComponentName Value="frmClockMain"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ClockMain"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="20" Y="20"/>
+        <CursorPos X="10" Y="18"/>
         <UsageCount Value="241"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -176,10 +176,10 @@
         <Filename Value="metoffice.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MetOffice"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="23"/>
-        <CursorPos X="66" Y="53"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="499"/>
         <UsageCount Value="239"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -202,10 +202,10 @@
         <Filename Value="alarm.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="alarm"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="154"/>
-        <CursorPos X="1" Y="6"/>
+        <TopLine Value="1"/>
+        <CursorPos X="5" Y="33"/>
         <UsageCount Value="219"/>
         <Loaded Value="True"/>
       </Unit7>
@@ -234,10 +234,12 @@
         <ComponentName Value="frmReminders"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reminders"/>
+        <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="129"/>
-        <CursorPos X="1" Y="142"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="6"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
       </Unit10>
       <Unit11>
         <Filename Value="datepicker.pas"/>
@@ -273,10 +275,10 @@
         <Filename Value="findthread.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="FindThread"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="118"/>
-        <CursorPos X="38" Y="7"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="82"/>
         <UsageCount Value="233"/>
         <Loaded Value="True"/>
       </Unit14>
@@ -284,10 +286,10 @@
         <Filename Value="music.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="music"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="346"/>
-        <CursorPos X="1" Y="6"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
         <UsageCount Value="233"/>
         <Loaded Value="True"/>
       </Unit15>
@@ -304,27 +306,29 @@
         <Filename Value="id3engine.pas"/>
         <UnitName Value="ID3Engine"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="23"/>
-        <CursorPos X="1" Y="1933"/>
+        <TopLine Value="524"/>
+        <CursorPos X="26" Y="542"/>
         <UsageCount Value="90"/>
       </Unit17>
       <Unit18>
         <Filename Value="sync.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="sync"/>
+        <EditorIndex Value="7"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="26" Y="5"/>
+        <CursorPos X="1" Y="6"/>
         <UsageCount Value="225"/>
+        <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="udpclient.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="udpclient"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="159"/>
-        <CursorPos X="1" Y="6"/>
+        <TopLine Value="1"/>
+        <CursorPos X="39" Y="76"/>
         <UsageCount Value="225"/>
         <Loaded Value="True"/>
       </Unit19>
@@ -332,10 +336,10 @@
         <Filename Value="udpserver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="udpserver"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="116"/>
-        <CursorPos X="1" Y="24"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="83"/>
         <UsageCount Value="225"/>
         <Loaded Value="True"/>
       </Unit20>
@@ -360,10 +364,10 @@
         <Filename Value="musicplayer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MusicPlayer"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="253"/>
-        <CursorPos X="1" Y="6"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="236"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit23>
@@ -397,11 +401,11 @@
         <ComponentName Value="frmPlaylist"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="PlaylistCreator"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="260"/>
-        <CursorPos X="1" Y="6"/>
-        <UsageCount Value="179"/>
+        <TopLine Value="1"/>
+        <CursorPos X="59" Y="24"/>
+        <UsageCount Value="185"/>
         <Loaded Value="True"/>
       </Unit27>
       <Unit28>
@@ -416,134 +420,151 @@
         <Filename Value="udpcommandserver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="udpcommandserver"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="100"/>
-        <CursorPos X="1" Y="141"/>
-        <UsageCount Value="163"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="167"/>
+        <UsageCount Value="169"/>
         <Loaded Value="True"/>
       </Unit29>
+      <Unit30>
+        <Filename Value="../../../lazarus/lcl/include/wincontrol.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="5482"/>
+        <CursorPos X="1" Y="5500"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="/usr/share/fpcsrc/2.6.0/packages/x11/src/xlib.pp"/>
+        <UnitName Value="xlib"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="799"/>
+        <CursorPos X="4" Y="806"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit31>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="241" Column="74" TopLine="223"/>
+        <Filename Value="reminders.pas"/>
+        <Caret Line="244" Column="1" TopLine="226"/>
       </Position1>
       <Position2>
-        <Filename Value="clockmain.pas"/>
-        <Caret Line="287" Column="35" TopLine="269"/>
+        <Filename Value="reminders.pas"/>
+        <Caret Line="245" Column="3" TopLine="227"/>
       </Position2>
       <Position3>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="241" Column="74" TopLine="230"/>
+        <Filename Value="reminders.pas"/>
+        <Caret Line="8" Column="66" TopLine="1"/>
       </Position3>
       <Position4>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="238" Column="38" TopLine="230"/>
+        <Filename Value="findthread.pas"/>
+        <Caret Line="7" Column="38" TopLine="117"/>
       </Position4>
       <Position5>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="247" Column="1" TopLine="230"/>
+        <Filename Value="music.pas"/>
+        <Caret Line="126" Column="15" TopLine="114"/>
       </Position5>
       <Position6>
-        <Filename Value="clockmain.pas"/>
-        <Caret Line="428" Column="1" TopLine="408"/>
+        <Filename Value="music.pas"/>
+        <Caret Line="341" Column="22" TopLine="323"/>
       </Position6>
       <Position7>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="248" Column="63" TopLine="127"/>
+        <Filename Value="udpclient.pas"/>
+        <Caret Line="47" Column="38" TopLine="38"/>
       </Position7>
       <Position8>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="136" Column="1" TopLine="127"/>
+        <Filename Value="udpserver.pas"/>
+        <Caret Line="154" Column="30" TopLine="119"/>
       </Position8>
       <Position9>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="138" Column="1" TopLine="127"/>
+        <Filename Value="udpserver.pas"/>
+        <Caret Line="83" Column="1" TopLine="65"/>
       </Position9>
       <Position10>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="140" Column="1" TopLine="127"/>
+        <Filename Value="sync.pas"/>
+        <Caret Line="5" Column="26" TopLine="1"/>
       </Position10>
       <Position11>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="266" Column="15" TopLine="252"/>
+        <Filename Value="sync.pas"/>
+        <Caret Line="42" Column="1" TopLine="25"/>
       </Position11>
       <Position12>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="262" Column="1" TopLine="252"/>
+        <Filename Value="playlistcreator.pas"/>
+        <Caret Line="6" Column="1" TopLine="259"/>
       </Position12>
       <Position13>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="265" Column="1" TopLine="252"/>
+        <Filename Value="playlistcreator.pas"/>
+        <Caret Line="69" Column="1" TopLine="50"/>
       </Position13>
       <Position14>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="266" Column="1" TopLine="252"/>
+        <Filename Value="playlistcreator.pas"/>
+        <Caret Line="67" Column="1" TopLine="51"/>
       </Position14>
       <Position15>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="268" Column="1" TopLine="252"/>
+        <Filename Value="playlistcreator.pas"/>
+        <Caret Line="68" Column="3" TopLine="50"/>
       </Position15>
       <Position16>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="270" Column="1" TopLine="252"/>
+        <Filename Value="udpcommandserver.pas"/>
+        <Caret Line="273" Column="45" TopLine="266"/>
       </Position16>
       <Position17>
         <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="136" Column="1" TopLine="127"/>
+        <Caret Line="167" Column="1" TopLine="150"/>
       </Position17>
       <Position18>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="138" Column="1" TopLine="127"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="349" Column="18" TopLine="323"/>
       </Position18>
       <Position19>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="140" Column="1" TopLine="127"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="356" Column="1" TopLine="339"/>
       </Position19>
       <Position20>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="141" Column="1" TopLine="127"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="413" Column="4" TopLine="395"/>
       </Position20>
       <Position21>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="138" Column="1" TopLine="127"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="63" Column="46" TopLine="45"/>
       </Position21>
       <Position22>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="140" Column="1" TopLine="127"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="933" Column="28" TopLine="915"/>
       </Position22>
       <Position23>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="165" Column="32" TopLine="153"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="934" Column="18" TopLine="916"/>
       </Position23>
       <Position24>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="260" Column="25" TopLine="231"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="911" Column="3" TopLine="893"/>
       </Position24>
       <Position25>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="910" Column="1" TopLine="892"/>
       </Position25>
       <Position26>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="46" Column="45" TopLine="17"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="966" Column="13" TopLine="948"/>
       </Position26>
       <Position27>
-        <Filename Value="metoffice.pas"/>
-        <Caret Line="53" Column="66" TopLine="23"/>
+        <Filename Value="clockmain.pas"/>
+        <Caret Line="1058" Column="1" TopLine="1036"/>
       </Position27>
       <Position28>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="136" Column="1" TopLine="127"/>
+        <Filename Value="reminders.pas"/>
+        <Caret Line="9" Column="20" TopLine="1"/>
       </Position28>
       <Position29>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="138" Column="1" TopLine="127"/>
+        <Filename Value="udpclient.pas"/>
+        <Caret Line="74" Column="1" TopLine="56"/>
       </Position29>
       <Position30>
-        <Filename Value="udpcommandserver.pas"/>
-        <Caret Line="140" Column="1" TopLine="127"/>
+        <Filename Value="udpclient.pas"/>
+        <Caret Line="83" Column="1" TopLine="65"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

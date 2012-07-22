@@ -1,3 +1,8 @@
+//
+// Copyright 2012 Shaun Simpson
+// shauns2029@gmail.com
+//
+
 unit sync;
 
 {$mode objfpc}{$H+}
@@ -5,7 +10,7 @@ unit sync;
 interface
 
 uses
-  Classes, SysUtils, Reminders, UDPClient, UDPServer;
+  Classes, SysUtils, UDPClient, UDPServer;
 
 type
 
@@ -39,8 +44,6 @@ implementation
 { TSyncClient }
 
 function TSyncClient.GetReminders(out Reminders: string): boolean;
-var
-  Buffer: string;
 begin
   Result := FClient.RequestReminders(Reminders);
 end;

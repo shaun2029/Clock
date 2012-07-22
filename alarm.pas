@@ -30,7 +30,6 @@ type
     FAlarmTime: TDatetime;
     FPath: string;
     FSilent: boolean;
-    LastSouded: TDateTime;
 
     procedure SoundAlarm;
   public

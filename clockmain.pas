@@ -14,14 +14,16 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, MetOffice, Alarm, ClockSettings, Reminders, ReminderList, LCLProc,
-  Music, Sync, Process, MusicPlayer, PlaylistCreator, UDPCommandServer;
+  Music, Sync, Process, MusicPlayer, PlaylistCreator, UDPCommandServer,
+  X, Xlib;
 
 const
-  VERSION = '1.0.10';
+  VERSION = '1.0.11';
 
 type
 
   TMusicState = (msOff, msMusicPlaying, msMusicPaused, msSleepPlaying, msSleepPaused);
+  TMediaKey = (mkNone, mkAudioPlay, mkAudioNext);
 
   { TfrmClockMain }
 
@@ -94,10 +96,15 @@ type
     FWeatherReport: string;
     FWeatherReports: array [0..4] of string;
 
+    FDisplay: PDisplay;
+
     procedure CloseApp;
     procedure ConfigureWifi;
     function DayOfWeekStr(Date: TDateTime): string;
+    function GetMediaKeyPress: TMediaKey;
+    procedure GrabMediaKeys;
     procedure PauseMusic;
+    procedure ReleaseMediaKeys;
     procedure Shutdown(Reboot: boolean);
     procedure UpdateSettings;
     procedure UpdateWeather;
@@ -227,16 +234,12 @@ begin
     // If reminder alarm active display reminder and disable weather update
     if (FReminderAlarm.State = asActive) then
     begin
-      if (mmoHTML.Font.Color <> clYellow) then
-      begin
-        mmoHTML.Font.Color := clYellow;
-        ReminderList := TStringList.Create;
-        frmReminders.SortReminders(FCurrentReminders);
-        frmReminders.PopulateList(FCurrentReminders, ReminderList);
-        mmoHTML.Caption := ReminderList.Text;
-        ReminderList.Free;
-      end;
-
+      mmoHTML.Font.Color := clYellow;
+      ReminderList := TStringList.Create;
+      frmReminders.SortReminders(FCurrentReminders);
+      frmReminders.PopulateList(FCurrentReminders, ReminderList);
+      mmoHTML.Caption := ReminderList.Text;
+      ReminderList.Free;
       tmrWeather.Enabled := False;
     end;
 
@@ -334,12 +337,22 @@ begin
         end;
     end;
   end;
+
+  case GetMediaKeyPress of
+    mkAudioPlay:
+      begin
+        Key := 'p';
+        FormKeyPress(Self, Key);
+      end;
+    mkAudioNext:
+      begin
+        Key := 'm';
+        FormKeyPress(Self, Key);
+      end;
+  end;
 end;
 
 procedure TfrmClockMain.tmrWeatherTimer(Sender: TObject);
-var
-  Forecast: TWeatherReport;
-  i: Integer;
 begin
   tmrWeather.Enabled := False;
 
@@ -397,7 +410,7 @@ end;
 procedure TfrmClockMain.UpdateWeather;
 var
   Forecast: TWeatherReport;
-  i, j: Integer;
+  i: Integer;
 begin
   tmrWeather.Enabled := False;
 
@@ -534,14 +547,16 @@ begin
   FCOMServer := TCOMServer.Create(44558);
 
   FWeatherReport := '';
+
+  GrabMediaKeys;
 end;
 
-procedure TfrmClockMain.FormClose(Sender: TObject; var CloseAction: TCloseAction
-  );
+procedure TfrmClockMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   FAlarm.ResetAlarm;
   FTimer.ResetAlarm;
   FReminderAlarm.ResetAlarm;
+  ReleaseMediaKeys;
 end;
 
 procedure TfrmClockMain.FormDestroy(Sender: TObject);
@@ -671,9 +686,33 @@ begin
   begin
     if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
     begin
-      FSleepPlayer.Pause;
-      FMusicPlayer.Pause;
-	    FMusicState := msOff;
+      case FMusicState of
+        msOff:
+          begin
+            FMusicPlayer.Next;
+            FMusicState := msMusicPlaying;
+          end;
+        msMusicPaused:
+          begin
+            FMusicPlayer.Play;
+            FMusicState := msMusicPlaying;
+          end;
+        msSleepPaused:
+          begin
+            FSleepPlayer.Play;
+            FMusicState := msSleepPlaying;
+          end;
+        msMusicPlaying:
+          begin
+            FMusicPlayer.Stop;
+            FMusicState := msMusicPaused;
+          end;
+        msSleepPlaying:
+          begin
+            FSleepPlayer.Stop;
+            FMusicState := msSleepPaused;
+          end;
+      end;
     end;
   end
   else if (Key = 's') or (Key = 'S') then
@@ -714,7 +753,8 @@ begin
       FMPGPlayer.VolumeDown;
     end;
   end
-  else if mmoHtml.Font.Color = clYellow then
+  else if ((Key = ' ') or (Key = 'w') or (Key = 'W'))
+    and (mmoHtml.Font.Color = clYellow) then
   begin
     UpdateWeather;
   end;
@@ -738,7 +778,6 @@ begin
     + '/usr/share/clock/alarm.mp3');
 
   UpdateSettings;
-  UpdateWeather;
   frmReminderList.FReminders := frmReminders;
   tmrMinute.Enabled := True;
 end;
@@ -752,6 +791,10 @@ begin
     FAlarm.ResetAlarm;
     FTimer.ResetAlarm;
     FReminderAlarm.ResetAlarm;
+  end
+  else if mmoHtml.Font.Color = clYellow then
+  begin
+    UpdateWeather;
   end
   else frmClockSettings.ShowModal;
 end;
@@ -864,8 +907,6 @@ end;
 procedure TfrmClockMain.Shutdown(Reboot: boolean);
 var
   Process: TProcess;
-  Timeout: TDateTime;
-  i: integer;
 begin
   tmrWeather.Enabled := False;
   tmrTime.Enabled := False;
@@ -978,6 +1019,52 @@ begin
   end;
 
   Process.Free;
+end;
+
+{
+keycode 160 = XF86AudioMute
+keycode 174 = XF86AudioLowerVolume
+keycode 176 = XF86AudioRaiseVolume
+keycode 162 = XF86AudioPlay
+keycode 144 = XF86AudioPrev
+keycode 145 = XF86AudioNext
+keycode 164 = XF86AudioStop
+keycode 237 = XF86HomePage
+}
+procedure TfrmClockMain.GrabMediaKeys;
+begin
+   FDisplay := XOpenDisplay(nil);
+
+   XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioPlay')),
+     {ShiftMask} 0, DefaultRootWindow(FDisplay), 0, GrabModeAsync,
+               GrabModeAsync);
+
+   XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioNext')),
+     0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+
+   { select kind of events we are interested in }
+   XSelectInput(FDisplay, DefaultRootWindow(FDisplay), KeyPressMask);
+end;
+
+procedure TfrmClockMain.ReleaseMediaKeys;
+begin
+  XCloseDisplay(FDisplay);
+  FDisplay := nil;
+end;
+
+function TfrmClockMain.GetMediaKeyPress: TMediaKey;
+var
+  Event: TXEvent;
+begin
+   Result := mkNone;
+
+   if XCheckMaskEvent(FDisplay, KeyPressMask, @Event) then
+   begin
+     case Event.xkey.keycode of
+       171: Result := mkAudioNext;
+       172: Result := mkAudioPlay
+     end;
+   end;
 end;
 
 end.

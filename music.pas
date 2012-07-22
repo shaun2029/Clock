@@ -123,6 +123,7 @@ begin
 DebugLn('Music: Stop');
 
     FState := psStopped;
+    StopSong;
   end;
 
   Tick;
@@ -136,9 +137,10 @@ DebugLn('Music: Pause');
 
     FState := psStopped;
     StopSong;
-  end;
 
-  Tick;
+    Tick;
+  end
+  else Play;
 end;
 
 procedure TPlayer.Play;

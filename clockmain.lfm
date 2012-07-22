@@ -20,7 +20,7 @@ object frmClockMain: TfrmClockMain
   LCLVersion = '0.9.30.4'
   object lblTime: TLabel
     Left = 8
-    Height = 42
+    Height = 34
     Top = 8
     Width = 227
     AutoSize = False
@@ -294,11 +294,11 @@ object frmClockMain: TfrmClockMain
   end
   object labLocation: TLabel
     Left = 8
-    Height = 18
-    Top = 44
+    Height = 21
+    Top = 38
     Width = 227
     AutoSize = False
-    Caption = 'Location'
+    Caption = 'Updating ...'
     Font.Color = clWhite
     Font.Height = -17
     Font.Name = 'Sans'
@@ -311,7 +311,6 @@ object frmClockMain: TfrmClockMain
     Height = 122
     Top = 72
     Width = 211
-    Caption = 'mmoHTML'
     Color = clBlack
     Font.Color = clWhite
     Font.Height = -16

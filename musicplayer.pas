@@ -233,7 +233,6 @@ end;
 procedure TMusicPlayer.EqualizerDefault(Filename: string);
 var
   myFile : TextFile;
-  text   : string;
 begin
   try
     // Try to open the file for writing to

@@ -71,7 +71,6 @@ end;
 
 function TUDPClient.RequestReminders(out Reminders: string): boolean;
 var
-  StartTime: TDateTime;
   Buffer: string;
   Data: TStringList;
   RemTotal: integer;
@@ -81,7 +80,6 @@ begin
   Reminders := '';
   Data := TStringList.Create;
   RemTotal := -1;
-  StartTime := Now;
   SetLength(Packets, 0);
 
   FSocket.CloseSocket;

@@ -64,9 +64,6 @@ end;
 
 procedure TfrmPlaylist.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
-var
-  SearchPath: string;
-  i: Integer;
 begin
   if Key = 27 then Self.ModalResult := mrCancel
   else if Key = 13 then
