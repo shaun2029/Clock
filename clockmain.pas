@@ -1033,17 +1033,19 @@ keycode 237 = XF86HomePage
 }
 procedure TfrmClockMain.GrabMediaKeys;
 begin
-   FDisplay := XOpenDisplay(nil);
+  FDisplay := XOpenDisplay(nil);
 
-   XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioPlay')),
-     {ShiftMask} 0, DefaultRootWindow(FDisplay), 0, GrabModeAsync,
-               GrabModeAsync);
+  // The Zipit does not like this for some reason
+  {$ifndef cpuarm}
+  XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioPlay')),
+    {ShiftMask} 0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
 
    XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioNext')),
      0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
 
    { select kind of events we are interested in }
    XSelectInput(FDisplay, DefaultRootWindow(FDisplay), KeyPressMask);
+   {$endif}
 end;
 
 procedure TfrmClockMain.ReleaseMediaKeys;
