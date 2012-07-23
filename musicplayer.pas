@@ -48,6 +48,14 @@ type
     property Equalizer: string write FEqualizer;
   end;
 
+const
+  // Zipit behaves differently.
+  {$ifdef armcpu}
+  BUFFER_TIME = 18;
+  {$else}
+  BUFFER_TIME = 1;
+  {$endif}
+
 implementation
 
 procedure TMusicPlayer.PlaySong(Song: string);
@@ -89,8 +97,8 @@ begin
       Song := 'LOAD ' + Song + #10;
       FPlayProcess.Input.Write(Song[1], Length(Song));
 
-      // 18 second buffer
-      FPlayTimeout := Now + EncodeTime(0, 0, 18, 0);
+      // playout buffer
+      FPlayTimeout := Now + EncodeTime(0, 0, BUFFER_TIME, 0);
 
       FState := mpsPlaying;
 
@@ -119,7 +127,7 @@ function TMusicPlayer.GetState: TMusicPlayerState;
 begin
   if FState = mpsPlaying then
   begin
-    // Play buffer 12 seconds
+    // Play buffer
     if FPlayProcess.Output.NumBytesAvailable = 0 then
     begin
       if Now > FPlayTimeout then
@@ -127,7 +135,7 @@ begin
         FState := mpsStopped;
       end;
     end
-    else FPlayTimeout := Now + EncodeTime(0, 0, 18, 0);
+    else FPlayTimeout := Now + EncodeTime(0, 0, BUFFER_TIME, 0);
 
     FlushStdout;
   end;
