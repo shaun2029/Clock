@@ -49,12 +49,23 @@ type
   end;
 
 const
-  // Zipit behaves differently.
+  {  Older versions of MPG123 (0.1.12) continue playing for the length
+   of the buffer after verbose output has stopped. The verbose output
+   is used to work out when playback has stopped.
+
+   Newer versions of MPG123 (0.2.13) stop playing when the verbose
+   output stops. To work around this problem, the buffer for non ARM
+   systems is short.}
+
+  // Zipit requires a big buffer for network play.
   {$ifdef armcpu}
-  BUFFER_TIME = 18;
+  BUFFER_TIME = 30; // in seconds
   {$else}
   BUFFER_TIME = 1;
   {$endif}
+
+  // Buffer size in KB. Based on 44100 samples per sec * 2 bytes
+  BUFFER_SIZE = (44100 * 2 * 2 * BUFFER_TIME) div 1024;
 
 implementation
 
@@ -87,9 +98,11 @@ begin
         FPlayProcess.Options := FPlayProcess.Options + [poUsePipes];
 
         if (FEqualizer <> '') and FileExists(FEqualizer) then
-          FPlayProcess.CommandLine := 'mpg123 --rva-mix  --buffer 3072 --preload 1.0 --equalizer ' + FEqualizer + ' -R'
+          FPlayProcess.CommandLine := 'mpg123 --rva-mix --preload 1.0 --equalizer ' + FEqualizer + ' -R'
         else
-          FPlayProcess.CommandLine := 'mpg123 --rva-mix  --buffer 3072 --preload 1.0 -R';
+          FPlayProcess.CommandLine := 'mpg123 --rva-mix --preload 1.0 -R';
+
+        FplayProcess.CommandLine := FPlayProcess.CommandLine + Format(' --buffer %d', [BUFFER_SIZE]);
 
         FPlayProcess.Execute;
       end;
