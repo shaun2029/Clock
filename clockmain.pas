@@ -8,7 +8,11 @@ unit ClockMain;
 {$mode Delphi}
 
 //{$DEFINE PICSHOW}
-{$DEFINE GRABXKEYS}
+
+// Zipit does not supprt media keys
+{$IFNDEF CPUARM}
+  {$DEFINE GRABXKEYS}
+{$ENDIF}
 
 interface
 
@@ -110,6 +114,7 @@ type
     procedure GrabMediaKeys;
     procedure ReleaseMediaKeys;
     function GetMediaKeyPress: TMediaKey;
+    function XErrorHandler(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
 {$ENDIF}
 
     procedure Shutdown(Reboot: boolean);
@@ -118,7 +123,6 @@ type
 
     procedure BeforeAlarm;
     procedure AfterAlarm;
-    function XErrorHandler(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
   public
     { public declarations }
     HTTPBuffer: string;

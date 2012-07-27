@@ -58,8 +58,8 @@ const
    systems is short.}
 
   // Zipit requires a big buffer for network play.
-  {$ifdef armcpu}
-  BUFFER_TIME = 30; // in seconds
+  {$ifdef CPUARM}
+  BUFFER_TIME = 4; // in seconds
   {$else}
   BUFFER_TIME = 1;
   {$endif}
