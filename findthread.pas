@@ -54,6 +54,8 @@ begin
   FCritical.Leave;
 end;
 
+{ The FileList and PathList are used in combination when producing a file file path.
+  This is done to save memory when storing files.}
 constructor TFindFilesThread.Create(FileList, PathList: TStringList;
   SearchPath, Extension: string);
 begin

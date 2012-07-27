@@ -155,6 +155,9 @@ begin
 
     FPlayProcess.Input.Write(Command[1], Length(Command));
     FState := mpsStopped;
+
+    //Command needs time to function
+    Sleep(1000);
   end;
 end;
 

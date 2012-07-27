@@ -18,7 +18,7 @@ uses
   X, Xlib;
 
 const
-  VERSION = '1.0.11';
+  VERSION = '1.0.12';
 
 type
 
@@ -97,6 +97,7 @@ type
     FWeatherReports: array [0..4] of string;
 
     FDisplay: PDisplay;
+    FAlarmActive: boolean;
 
     procedure CloseApp;
     procedure ConfigureWifi;
@@ -144,6 +145,7 @@ end;
 
 procedure TfrmClockMain.BeforeAlarm;
 begin
+  FAlarmActive := True;
   PauseMusic;
 
   // Play music after alarm
@@ -166,6 +168,8 @@ begin
 		    FMusicState := msSleepPlaying;
 	    end;
   end;
+
+  FAlarmActive := False;
 end;
 
 function TfrmClockMain.DayOfWeekStr(Date: TDateTime): string;
@@ -543,6 +547,7 @@ begin
   FSyncClient := nil;
   
   FMusicState := msOff;
+  FAlarmActive := False;
 
   FCOMServer := TCOMServer.Create(44558);
 
@@ -670,7 +675,7 @@ begin
   begin
     if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
     begin
-	    if not (FMusicState in [msMusicPaused, msSleepPaused]) then
+	    if not FAlarmActive then
 	    begin
         FSleepPlayer.Stop;
 		    FMusicPlayer.Next;
@@ -694,13 +699,19 @@ begin
           end;
         msMusicPaused:
           begin
-            FMusicPlayer.Play;
-            FMusicState := msMusicPlaying;
+            if not FAlarmActive then
+            begin
+              FMusicPlayer.Play;
+              FMusicState := msMusicPlaying;
+            end;
           end;
         msSleepPaused:
           begin
-            FSleepPlayer.Play;
-            FMusicState := msSleepPlaying;
+            if not FAlarmActive then
+            begin
+              FSleepPlayer.Play;
+              FMusicState := msSleepPlaying;
+            end;
           end;
         msMusicPlaying:
           begin
@@ -719,7 +730,7 @@ begin
   begin
     if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
     begin
-	    if not (FMusicState in [msMusicPaused, msSleepPaused]) then
+	    if not FAlarmActive then
 	    begin
         FMusicPlayer.Stop;
 		    FSleepPlayer.Next;

@@ -80,6 +80,8 @@ begin
   end;
 end;
 
+{ Claculate what needs to be displayed for file navigation.
+  If Next is true display the next branch else display the previous. }
 procedure TfrmPlaylist.Display(Next: boolean);
 var
   i, Level, Selected: Integer;
@@ -172,6 +174,7 @@ begin
     FLevel := Level;
   end;
 
+  lstDisplay.Sorted := True;
   SelectList.Free;
 end;
 
