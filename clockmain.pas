@@ -8,6 +8,7 @@ unit ClockMain;
 {$mode Delphi}
 
 //{$DEFINE PICSHOW}
+{$DEFINE GRABXKEYS}
 
 interface
 
@@ -15,10 +16,10 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, MetOffice, Alarm, ClockSettings, Reminders, ReminderList, LCLProc,
   Music, Sync, Process, MusicPlayer, PlaylistCreator, UDPCommandServer,
-  X, Xlib;
+  X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.13';
+  VERSION = '1.0.14';
 
 type
 
@@ -102,16 +103,22 @@ type
     procedure CloseApp;
     procedure ConfigureWifi;
     function DayOfWeekStr(Date: TDateTime): string;
-    function GetMediaKeyPress: TMediaKey;
-    procedure GrabMediaKeys;
+    procedure Log(Message: string);
     procedure PauseMusic;
+
+{$IFDEF GRABXKEYS}
+    procedure GrabMediaKeys;
     procedure ReleaseMediaKeys;
+    function GetMediaKeyPress: TMediaKey;
+{$ENDIF}
+
     procedure Shutdown(Reboot: boolean);
     procedure UpdateSettings;
     procedure UpdateWeather;
 
     procedure BeforeAlarm;
     procedure AfterAlarm;
+    function XErrorHandler(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
   public
     { public declarations }
     HTTPBuffer: string;
@@ -265,7 +272,7 @@ begin
 
     FAlarm.Tick;
     FReminderAlarm.Tick;
-    FTimer.Tick;	
+    FTimer.Tick;
 
     if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
     begin
@@ -342,6 +349,7 @@ begin
     end;
   end;
 
+{$IFDEF GRABXKEYS}
   case GetMediaKeyPress of
     mkAudioPlay:
       begin
@@ -354,6 +362,7 @@ begin
         FormKeyPress(Self, Key);
       end;
   end;
+{$ENDIF}
 end;
 
 procedure TfrmClockMain.tmrWeatherTimer(Sender: TObject);
@@ -545,7 +554,7 @@ begin
   FSleepPlayer := nil;
   FSyncServer := nil;
   FSyncClient := nil;
-  
+
   FMusicState := msOff;
   FAlarmActive := False;
 
@@ -553,7 +562,9 @@ begin
 
   FWeatherReport := '';
 
+{$IFDEF GRABXKEYS}
   GrabMediaKeys;
+{$ENDIF}
 end;
 
 procedure TfrmClockMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -561,7 +572,9 @@ begin
   FAlarm.ResetAlarm;
   FTimer.ResetAlarm;
   FReminderAlarm.ResetAlarm;
+{$IFDEF GRABXKEYS}
   ReleaseMediaKeys;
+{$ENDIF}
 end;
 
 procedure TfrmClockMain.FormDestroy(Sender: TObject);
@@ -1032,6 +1045,14 @@ begin
   Process.Free;
 end;
 
+procedure TfrmClockMain.Log(Message: string);
+begin
+{$IFDEF LOGGING}
+  DebugLn(Self.ClassName + #9#9 + Message);
+{$ENDIF}
+end;
+
+{$IFDEF GRABXKEYS}
 {
 keycode 160 = XF86AudioMute
 keycode 174 = XF86AudioLowerVolume
@@ -1043,25 +1064,62 @@ keycode 164 = XF86AudioStop
 keycode 237 = XF86HomePage
 }
 procedure TfrmClockMain.GrabMediaKeys;
+var
+  Error: Integer;
 begin
+  FDisplay := nil;
+
+  Log('XOpenDisplay ...');
   FDisplay := XOpenDisplay(nil);
 
-  // The Zipit does not like this for some reason
-  {$ifndef cpuarm}
-  XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioPlay')),
-    {ShiftMask} 0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+  if FDisplay <> nil then
+  begin
+    XSetErrorHandler(TXErrorHandler(XErrorHandler));
 
-   XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioNext')),
-     0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+    Log('XGrabKey ...');
+    Error := XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioPlay')),
+      {ShiftMask} 0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
 
-   { select kind of events we are interested in }
-   XSelectInput(FDisplay, DefaultRootWindow(FDisplay), KeyPressMask);
-   {$endif}
+    if Error = 1 then
+    begin
+      Log('XGrabKey ...');
+      Error := XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioNext')),
+         0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+    end;
+
+
+    if Error = 1 then
+    begin
+      { select kind of events we are interested in }
+      Log('XSelectInput ...');
+      Error := XSelectInput(FDisplay, DefaultRootWindow(FDisplay), KeyPressMask);
+      Log('XSelectInput.');
+    end;
+
+    if Error <> 1 then
+    begin
+      Log('GrabMediaKeys Error: ' + IntToStr(Error));
+      ReleaseMediaKeys;
+    end;
+  end;
 end;
 
 procedure TfrmClockMain.ReleaseMediaKeys;
+var
+  Error: Integer;
 begin
-  XCloseDisplay(FDisplay);
+  if FDisplay = nil then
+    Exit;
+
+  Log('XCloseDisplay ...');
+  Error := XCloseDisplay(FDisplay);
+  Log('XCloseDisplay.');
+
+  if Error <> 0 then
+  begin
+    Log('ReleaseMediaKeys Error: ' + IntToStr(Error));
+  end;
+
   FDisplay := nil;
 end;
 
@@ -1069,16 +1127,42 @@ function TfrmClockMain.GetMediaKeyPress: TMediaKey;
 var
   Event: TXEvent;
 begin
-   Result := mkNone;
+  Result := mkNone;
 
-   if XCheckMaskEvent(FDisplay, KeyPressMask, @Event) then
-   begin
-     case Event.xkey.keycode of
-       171: Result := mkAudioNext;
-       172: Result := mkAudioPlay
-     end;
-   end;
+  if FDisplay = nil then
+    Exit;
+
+  Log('XCheckMaskEvent ...');
+  try
+    if XCheckMaskEvent(FDisplay, KeyPressMask, @Event) then
+    begin
+      Log('XEvent = ' + IntToStr(Event._type));
+
+      if Event._type = 2 then
+      begin
+        case Event.xkey.keycode of
+          171: Result := mkAudioNext;
+          172: Result := mkAudioPlay;
+        end;
+      end;
+    end;
+  except
+    on E: Exception do
+    begin
+      Log('Exception GetMediaKeyPress: ' + E.Message);
+      ReleaseMediaKeys;
+    end;
+  end;
+
+  Log('XCheckMaskEvent.');
 end;
+
+function TfrmClockMain.XErrorHandler(para1:PDisplay; para2:PXErrorEvent):cint;cdecl;
+begin
+  // do nothing with error
+end;
+
+{$ENDIF}
 
 end.
 
