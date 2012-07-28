@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.14';
+  VERSION = '1.0.15';
 
 type
 
