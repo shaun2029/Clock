@@ -20,6 +20,7 @@ type
 
   TMusicPlayer  = class
   private
+    FVolume: integer;
     FEqualizer: string;
     FPlayProcess: TProcess;
     FPlayTimeout: TDateTime;
@@ -27,12 +28,15 @@ type
     FSongTitle: string;
     FState: TMusicPlayerState;
     FId3: TID3Engine;
-    FStartTime: TDateTime;
+    FBufferTime: integer;
+    FPlayLength: integer;
 
+    procedure DestroyPlayProcess;
     procedure EqualizerDefault(Filename: string);
+    procedure FlushStdout;
     function GetState: TMusicPlayerState;
     procedure PlaySong(Song: string);
-    procedure StartPlayProcess(out Process: TProcess; Song: String);
+    procedure StartPlayProcess(out Process: TProcess);
     procedure StopSong;
   public
     constructor Create;
@@ -60,7 +64,7 @@ const
 
   // Zipit requires a big buffer for network play.
   {$ifdef CPUARM}
-  BUFFER_TIME = 20; // in seconds
+  BUFFER_TIME = 18; // in seconds
   {$else}
   BUFFER_TIME = 1;
   {$endif}
@@ -96,11 +100,19 @@ begin
   try
     if FileExists(Song) then
     begin
-      StartPlayProcess(FPlayProcess, Song);
+      if not Assigned(FPlayProcess) then
+        StartPlayProcess(FPlayProcess);
 
-      FState := mpsPlaying;
+      FPlayLength := 0; // used to detect if a play error occurs
 
       if Trim(FSongTitle) = '' then FSongTitle := ExtractFilename(Song);
+      Song := 'LOAD ' + Song + #10;
+      FPlayProcess.Input.Write(Song[1], Length(Song));
+
+      // playout buffer
+      FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime, 0);
+
+      FState := mpsPlaying;
     end;
   except
     on E: Exception do
@@ -110,7 +122,7 @@ begin
   end;
 end;
 
-procedure TMusicPlayer.StartPlayProcess(out Process: TProcess; Song: String);
+procedure TMusicPlayer.StartPlayProcess(out Process: TProcess);
 begin
   Process := TProcess.Create(nil);
   Process.Options := Process.Options + [poUsePipes];
@@ -118,30 +130,71 @@ begin
   // Use mpg321 if possible
   if FileExists('/usr/bin/mpg321') then
   begin
-    Process.CommandLine := Format('mpg321 "%s"', [Song]);
+    Process.CommandLine := 'mpg321 -R 1';
+    FBufferTime := 1;
   end
   else
   begin
-    Process.CommandLine := Format('mpg123 --rva-mix --buffer %d --preload 1.0 "%s"', [BUFFER_SIZE, Song]);
+    Process.CommandLine := Format('mpg123 --rva-mix --buffer %d --preload 1.0 -R', [BUFFER_SIZE]);
+    FBufferTime := BUFFER_TIME;
   end;
 
   Process.Execute;
-  // Slow dow the process in case of missing files
-  FStartTime := Now + EncodeTime(0, 0, 10, 0);
 end;
 
+procedure TMusicPlayer.FlushStdout;
+const
+  BLOCK_SIZE = 4096;
+var
+  Buffer: array [0..BLOCK_SIZE] of char;
+  Bytes, ReadSize: integer;
+begin
+  if Assigned(FPlayProcess) then
+  begin
+    Bytes := FPlayProcess.Output.NumBytesAvailable;
+
+    while Bytes > 0 do
+    begin
+      if Bytes > BLOCK_SIZE then
+        ReadSize := BLOCK_SIZE
+      else
+        ReadSize := Bytes;
+
+      FPlayProcess.Output.Read(Buffer[0], ReadSize);
+
+      Bytes := Bytes - ReadSize;
+    end;
+  end;
+end;
 
 function TMusicPlayer.GetState: TMusicPlayerState;
 begin
-  if (FState = mpsPlaying) and (Now > FStartTime) then
+  if FState = mpsPlaying then
   begin
-    if not Assigned(FPlayProcess) or not FPlayProcess.Running then
+    // Play buffer
+    if FPlayProcess.Output.NumBytesAvailable = 0 then
     begin
-      if Assigned(FPlayProcess) then
-        FreeAndNil(FPlayProcess);
+      if Now > FPlayTimeout then
+      begin
+        FState := mpsStopped;
 
-      FState := mpsStopped;
+        // Assume that the play process is in an error state if the play time is too short
+        if FPlayLength < 2 then
+        begin
+          // Kill the play process
+          DestroyPlayProcess;
+          // Slow down process
+          Sleep(5000);
+        end;
+      end;
+    end
+    else
+    begin
+      FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime, 0);
+      Inc(FPlayLength);
     end;
+
+    FlushStdout;
   end;
 
   Result := FState;
@@ -151,15 +204,31 @@ procedure TMusicPlayer.StopSong;
 var
   Command: string;
 begin
+  if FState = mpsPlaying then
+  begin
+    // Stop command broken when using a buffer
+    //Command := 'STOP' + #10;
+    Command := 'PAUSE' + #10;
+
+    FPlayProcess.Input.Write(Command[1], Length(Command));
+    FState := mpsStopped;
+
+    //Command needs time to function
+    Sleep(1000);
+  end;
+end;
+
+procedure TMusicPlayer.DestroyPlayProcess;
+begin
   if Assigned(FPlayProcess) then
   begin
     if FPlayProcess.Running then
-      FPlayProcess.Terminate(0);
+    begin
+      FPlayProcess.Terminate(1);
+    end;
 
     FreeAndNil(FPlayProcess);
   end;
-
-  FState := mpsStopped;
 end;
 
 constructor TMusicPlayer.Create;
@@ -168,11 +237,12 @@ begin
   FId3 := TID3Engine.Create(nil);
   FId3.ReadingOnly := True;
   FEqualizer := '';
+  FVolume := 100;
 end;
 
 destructor TMusicPlayer.Destroy;
 begin
-  StopSong;
+  DestroyPlayProcess;
 
   try
     FId3.Free;
