@@ -172,9 +172,10 @@ begin
   if FState = mpsPlaying then
   begin
     // Play buffer
-    if FPlayProcess.Output.NumBytesAvailable = 0 then
+    if not FPlayProcess.Running
+      or (FPlayProcess.Output.NumBytesAvailable = 0) then
     begin
-      if Now > FPlayTimeout then
+      if not FPlayProcess.Running or (Now > FPlayTimeout) then
       begin
         FState := mpsStopped;
 
@@ -183,7 +184,7 @@ begin
         begin
           // Kill the play process
           DestroyPlayProcess;
-          // Slow down process
+          // Slow down proceedings
           Sleep(5000);
         end;
       end;
