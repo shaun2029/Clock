@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.16';
+  VERSION = '1.0.17';
 
 type
 
@@ -1058,14 +1058,14 @@ end;
 
 {$IFDEF GRABXKEYS}
 {
-keycode 160 = XF86AudioMute
-keycode 174 = XF86AudioLowerVolume
-keycode 176 = XF86AudioRaiseVolume
-keycode 162 = XF86AudioPlay
-keycode 144 = XF86AudioPrev
-keycode 145 = XF86AudioNext
-keycode 164 = XF86AudioStop
-keycode 237 = XF86HomePage
+keycode 121 = XF86AudioMute
+keycode 122 = XF86AudioLowerVolume
+keycode 123 = XF86AudioRaiseVolume
+keycode 171 = XF86AudioNext
+Keycode 172 = XF86AudioPlay
+Keycode 173 = XF86AudioPrev
+Keycode 174 = XF86AudioStop
+Keycode 180 = XF86HomePage
 }
 procedure TfrmClockMain.GrabMediaKeys;
 var
@@ -1091,6 +1091,19 @@ begin
          0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
     end;
 
+    if Error = 1 then
+    begin
+      Log('XGrabKey ...');
+      Error := XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86AudioMute')),
+         0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+    end;
+
+    if Error = 1 then
+    begin
+      Log('XGrabKey ...');
+      Error := XGrabKey(FDisplay, XKeysymToKeycode(FDisplay, XStringToKeysym('XF86HomePage')),
+         0, DefaultRootWindow(FDisplay), 0, GrabModeAsync, GrabModeAsync);
+    end;
 
     if Error = 1 then
     begin
@@ -1145,8 +1158,8 @@ begin
       if Event._type = 2 then
       begin
         case Event.xkey.keycode of
-          171: Result := mkAudioNext;
-          172: Result := mkAudioPlay;
+          171, 180: Result := mkAudioNext;
+          172, 121: Result := mkAudioPlay;
         end;
       end;
     end;
