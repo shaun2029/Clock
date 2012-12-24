@@ -263,9 +263,6 @@ begin
 
   if tmrTime.Tag >= 1 then
   begin
-    if not frmClockSettings.Visible then
-      UpdateSettings;
-
     tmrWeather.Enabled := True;
 
     // Disable weather update around alarm times
@@ -752,6 +749,7 @@ begin
   else if Key = #13 then
   begin
     frmClockSettings.ShowModal;
+    UpdateSettings;
   end
   else if (Key = 'l') or (Key='L') then
   begin
@@ -864,7 +862,11 @@ begin
   begin
     UpdateWeather;
   end
-  else frmClockSettings.ShowModal;
+  else
+  begin
+    frmClockSettings.ShowModal;
+    UpdateSettings;
+  end;
 end;
 
 procedure TfrmClockMain.UpdateSettings;
