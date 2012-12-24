@@ -5,7 +5,7 @@
 
 unit PlaylistCreator;
 
-{$mode objfpc}{$H+}
+{$mode Delphi}
 
 interface
 
