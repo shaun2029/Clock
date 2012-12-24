@@ -110,7 +110,8 @@ begin
       FPlayProcess.Input.Write(Song[1], Length(Song));
 
       // playout buffer
-      FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime, 0);
+      // Timeout starts with long timeout to allow for startup time.
+      FPlayTimeout := Now + EncodeTime(0, 0, 45, 0);
 
       FState := mpsPlaying;
     end;
@@ -191,7 +192,7 @@ begin
     end
     else
     begin
-      FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime, 0);
+      FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime + 1, 0);
       Inc(FPlayLength);
     end;
 
