@@ -26,6 +26,7 @@ type
     cbxPlayMusic: TCheckBox;
     cbxGetReminders: TCheckBox;
     cbxSilentAlarm: TCheckBox;
+    edtMeditationPath: TEdit;
     edtMusicPath: TEdit;
     edtHour: TSpinEdit;
     edtLocation: TEdit;
@@ -38,6 +39,7 @@ type
     edtRemMinute: TSpinEdit;
     Label1: TLabel;
     Label10: TLabel;
+    Label11: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -83,7 +85,7 @@ begin
   if (Key = #27) or (Key = #13) then
   begin
     XMLPropstorage1.Save;
-    Self.Hide;
+    Self.Close;
   end;
 end;
 
@@ -104,7 +106,7 @@ end;
 procedure TfrmClockSettings.btnStartTimerClick(Sender: TObject);
 begin
   FTimerActive := True;
-  Self.Hide;
+  Self.Close;
 end;
 
 procedure TfrmClockSettings.FormCreate(Sender: TObject);

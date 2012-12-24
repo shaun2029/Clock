@@ -11,8 +11,8 @@ object frmClockSettings: TfrmClockSettings
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   Position = poMainFormCenter
-  SessionProperties = 'cbxEnableReminders.Checked;cbxFri.Checked;cbxGetReminders.Checked;cbxMon.Checked;cbxPlayMusic.Checked;cbxSat.Checked;cbxSun.Checked;cbxThu.Checked;cbxTue.Checked;cbxWed.Checked;edtHour.Value;edtLocation1.Text;edtLocation2.Text;edtLocation3.Text;edtLocation.Text;edtMinute.Value;edtMusicPath.Text;edtRemHour.Value;edtRemMinute.Value;edtSleepPath.Text;cbxSilentAlarm.Checked'
-  LCLVersion = '0.9.30.4'
+  SessionProperties = 'cbxEnableReminders.Checked;cbxFri.Checked;cbxGetReminders.Checked;cbxMon.Checked;cbxPlayMusic.Checked;cbxSat.Checked;cbxSilentAlarm.Checked;cbxSun.Checked;cbxThu.Checked;cbxTue.Checked;cbxWed.Checked;edtHour.Value;edtLocation1.Text;edtLocation2.Text;edtLocation3.Text;edtLocation.Text;edtMinute.Value;edtMusicPath.Text;edtRemHour.Value;edtRemMinute.Value;edtSleepPath.Text;edtMeditationPath.Text'
+  LCLVersion = '1.0.4.0'
   object PageControl1: TPageControl
     Left = 8
     Height = 216
@@ -230,10 +230,10 @@ object frmClockSettings: TfrmClockSettings
         Text = '/home/user/Music'
       end
       object Label9: TLabel
-        Left = 14
-        Height = 42
+        Left = 6
+        Height = 26
         Top = 27
-        Width = 88
+        Width = 96
         AutoSize = False
         Caption = 'Music Path:'
         ParentColor = False
@@ -242,28 +242,46 @@ object frmClockSettings: TfrmClockSettings
       object edtSleepPath: TEdit
         Left = 110
         Height = 27
-        Top = 91
+        Top = 67
         Width = 184
         TabOrder = 1
         Text = '/home/user/Sleep'
       end
       object Label10: TLabel
-        Left = 14
-        Height = 42
-        Top = 83
-        Width = 88
+        Left = 6
+        Height = 24
+        Top = 67
+        Width = 96
         AutoSize = False
-        Caption = 'Sleep Music Path:'
+        Caption = 'Sleep Path:'
         ParentColor = False
         WordWrap = True
       end
       object cbxPlayMusic: TCheckBox
         Left = 110
         Height = 24
-        Top = 139
+        Top = 155
         Width = 175
         Caption = 'Play music after alarm'
         TabOrder = 2
+      end
+      object edtMeditationPath: TEdit
+        Left = 110
+        Height = 27
+        Top = 107
+        Width = 184
+        TabOrder = 3
+        Text = '/home/user/Meditation'
+      end
+      object Label11: TLabel
+        Left = 6
+        Height = 40
+        Top = 107
+        Width = 96
+        AutoSize = False
+        Caption = 'Meditation Path:'
+        ParentColor = False
+        WordWrap = True
       end
     end
     object TabSheet3: TTabSheet

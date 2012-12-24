@@ -17,7 +17,7 @@ uses
 
 type
 
-  TRemoteCommand = (rcomNone, rcomNext, rcomMusic, rcomSleep, rcomPause, rcomVolumeUp, rcomVolumeDown);
+  TRemoteCommand = (rcomNone, rcomNext, rcomMusic, rcomSleep, rcomMeditation, rcomPause, rcomVolumeUp, rcomVolumeDown);
 
   { TCOMServerThread }
 
@@ -200,6 +200,12 @@ begin
             begin
               FCritical.Enter;
               FCommand := rcomSleep;
+              FCritical.Leave;
+            end
+            else if Buffer = 'CLOCK:MEDITATION' then
+            begin
+              FCritical.Enter;
+              FCommand := rcomMeditation;
               FCritical.Leave;
             end
             else if Buffer = 'CLOCK:PAUSE' then

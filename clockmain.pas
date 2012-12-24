@@ -23,11 +23,12 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.17';
+  VERSION = '1.0.18';
 
 type
 
-  TMusicState = (msOff, msMusicPlaying, msMusicPaused, msSleepPlaying, msSleepPaused);
+  TMusicState = (msOff, msPlaying, msPaused);
+  TMusicSource = (msrcNone, msrcSleep, msrcMusic, msrcMeditation);
   TMediaKey = (mkNone, mkAudioPlay, mkAudioNext);
 
   { TfrmClockMain }
@@ -94,8 +95,9 @@ type
     Locations: array[0..3] of string;
     FCurrentLocation: integer;
 
-    FMusicPlayer, FSleepPlayer: TPlayer;
+    FMusicPlayer, FSleepPlayer, FMeditationPlayer: TPlayer;
  	  FMusicState: TMusicState;
+    FMusicSource: TMusicSource;
 
     FCOMServer: TCOMServer;
     FWeatherReport: string;
@@ -109,6 +111,8 @@ type
     function DayOfWeekStr(Date: TDateTime): string;
     procedure Log(Message: string);
     procedure PauseMusic;
+    procedure PlayMusic;
+    procedure SetMusicSource(Source: TMusicSource);
 
 {$IFDEF GRABXKEYS}
     procedure GrabMediaKeys;
@@ -139,19 +143,50 @@ implementation
 
 procedure TfrmClockMain.PauseMusic;
 begin
+  if not Assigned(FMusicPlayer) or not Assigned(FSleepPlayer)
+    or not Assigned(FMeditationPlayer) then Exit;
+
+
   // Disable music around alarm times and timer times of it is playing
   case FMusicState of
-    msMusicPlaying:
+    msPlaying:
       begin
-        FMusicPlayer.Stop;
-	      FMusicState := msMusicPaused;
-	    end;
-    msSleepPlaying:
-      begin
-        FSleepPlayer.Stop;
-        FMusicState := msSleepPaused;
+        case FMusicSource of
+          msrcSleep: FSleepPlayer.Stop;
+          msrcMusic: FMusicPlayer.Stop;
+          msrcMeditation: FMeditationPlayer.Stop;
+        end;
+
+	      FMusicState := msPaused;
 	    end;
   end;
+end;
+
+procedure TfrmClockMain.PlayMusic;
+var
+  Player: TPlayer;
+begin
+  if not Assigned(FMusicPlayer) or not Assigned(FSleepPlayer)
+    or not Assigned(FMeditationPlayer) then Exit;
+
+  case FMusicSource of
+    msrcSleep: Player := FSleepPlayer;
+    msrcMeditation: Player := FMeditationPlayer;
+    else Player := FMusicPlayer;
+  end;
+
+  case FMusicState of
+    msOff, msPaused:
+      begin
+        Player.Play;
+      end;
+    msPlaying:
+      begin
+        Player.Next; // if playing play next track
+	    end;
+  end;
+
+  FMusicState := msPlaying;
 end;
 
 procedure TfrmClockMain.BeforeAlarm;
@@ -160,24 +195,24 @@ begin
   PauseMusic;
 
   // Play music after alarm
-  if frmClockSettings.cbxPlayMusic.Checked or frmClockSettings.cbxSilentAlarm.Checked then
-    FMusicState := msMusicPaused;
+  if frmClockSettings.cbxPlayMusic.Checked then
+    FMusicState := msPaused;
 end;
 
 procedure TfrmClockMain.AfterAlarm;
 begin
   // Possibly start music after alarm
   case FMusicState of
-    msMusicPaused:
-	    begin
-	      FMusicPlayer.Play;
-	      FMusicState := msMusicPlaying;
-	    end;
-	  msSleepPaused:
-	    begin
-	      FSleepPlayer.Play;
-		    FMusicState := msSleepPlaying;
-	    end;
+    msPaused:
+    begin
+      case FMusicSource of
+        msrcSleep: FSleepPlayer.Play;
+        msrcMusic: FMusicPlayer.Play;
+        msrcMeditation: FMeditationPlayer.Play;
+      end;
+
+      FMusicState := msPlaying;
+    end;
   end;
 
   FAlarmActive := False;
@@ -208,9 +243,10 @@ var
   DayStr: string;
   TimeCaption: string;
   ReminderList: TStringList;
-  i, j: Integer;
+  i, j, k: Integer;
   Command: TRemoteCommand;
   Key: Char;
+  Player: TPlayer;
 begin
   Current := Now;
 
@@ -278,20 +314,31 @@ begin
     FReminderAlarm.Tick;
     FTimer.Tick;
 
-    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
+    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer)
+      and Assigned(FMeditationPlayer) then
     begin
       i := FSleepPlayer.Tick;
       j := FMusicPlayer.Tick;
+      k := FMeditationPlayer.Tick;
 
       if i >= 0  then
         labSong.Caption := 'Updating sleep music list ... ' + IntToStr(i)
       else if j >= 0 then
         labSong.Caption := 'Updating music list ... ' + IntToStr(j)
-      else if FMusicPlayer.State = psPlaying then
-        labSong.Caption := FMusicPlayer.SongArtist + ' - ' + FMusicPlayer.SongTitle
-      else if FSleepPlayer.State = psPlaying then
-          labSong.Caption := FSleepPlayer.SongArtist + ' - ' + FSleepPlayer.SongTitle
-      else labSong.Caption :=  'Shaun''s Clock Version: ' + VERSION;
+      else if k >= 0 then
+        labSong.Caption := 'Updating meditation list ... ' + IntToStr(k)
+      else
+      begin
+        case FMusicSource of
+          msrcSleep: Player := FSleepPlayer;
+          msrcMeditation: Player := FMeditationPlayer;
+          else Player := FMusicPlayer;
+        end;
+
+        if Player.State = psPlaying then
+          labSong.Caption := Player.SongArtist + ' - ' + Player.SongTitle
+        else labSong.Caption :=  'Shaun''s Clock Version: ' + VERSION;
+      end;
     end;
 
     tmrTime.Tag := 0;
@@ -309,45 +356,42 @@ begin
     case Command of
       rcomNext:
         begin
-          if FMusicState in [msSleepPlaying, msSleepPaused] then
-            Key := 's'
-          else
-            Key := 'm';
+          case FMusicSource of
+            msrcSleep: Key := 's';
+            msrcMeditation: Key := 'd';
+            else Key := 'm';
+          end;
 
           FormKeyPress(Self, Key);
         end;
       rcomMusic:
         begin
-          if not (FMusicState in [msMusicPlaying, msMusicPaused]) then
-          begin
-            Key := 'm';
-            FormKeyPress(Self, Key);
-          end;
+          Key := 'm';
+          FormKeyPress(Self, Key);
         end;
       rcomSleep:
         begin
-          if not (FMusicState in [msSleepPlaying, msSleepPaused]) then
-          begin
-            Key := 's';
-            FormKeyPress(Self, Key);
-          end;
+          Key := 's';
+          FormKeyPress(Self, Key);
+        end;
+      rcomMeditation:
+        begin
+          Key := 'd';
+          FormKeyPress(Self, Key);
         end;
       rcomPause:
         begin
           Key := 'p';
-
           FormKeyPress(Self, Key);
         end;
       rcomVolumeUp:
         begin
           Key := '.';
-
           FormKeyPress(Self, Key);
         end;
       rcomVolumeDown:
         begin
           Key := ',';
-
           FormKeyPress(Self, Key);
         end;
     end;
@@ -556,10 +600,12 @@ begin
 
   FMusicPlayer := nil;
   FSleepPlayer := nil;
+  FMeditationPlayer := nil;
   FSyncServer := nil;
   FSyncClient := nil;
 
   FMusicState := msOff;
+  FMusicSource := msrcNone;
   FAlarmActive := False;
 
   FCOMServer := TCOMServer.Create(44558);
@@ -588,6 +634,9 @@ begin
 
   if Assigned(FSleepPlayer) then
     FSleepPlayer.Free;
+
+  if Assigned(FMeditationPlayer) then
+    FMeditationPlayer.Free;
 
   FMPGPlayer.Free;
 
@@ -658,6 +707,39 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmClockMain.SetMusicSource(Source: TMusicSource);
+begin
+  if not Assigned(FMusicPlayer) or not Assigned(FSleepPlayer)
+    or not Assigned(FMeditationPlayer) then Exit;
+
+  case Source of
+    msrcSleep:
+      begin
+        FMusicPlayer.Stop;
+        FMeditationPlayer.Stop;
+      end;
+    msrcMusic:
+      begin
+        FSleepPlayer.Stop;
+        FMeditationPlayer.Stop;
+      end;
+    msrcMeditation:
+      begin
+        FSleepPlayer.Stop;
+        FMusicPlayer.Stop;
+      end;
+    else
+    begin
+      FSleepPlayer.Stop;
+      FMusicPlayer.Stop;
+      FMeditationPlayer.Stop;
+    end;
+  end;
+
+  FMusicSource := Source
+end;
+
+
 procedure TfrmClockMain.FormKeyPress(Sender: TObject; var Key: char);
 begin
   tmrMinute.Enabled := False;
@@ -690,81 +772,39 @@ begin
   end
   else if (Key = 'm') or (Key = 'M') then
   begin
-    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
-    begin
-	    if not FAlarmActive then
-	    begin
-        FSleepPlayer.Stop;
-		    FMusicPlayer.Next;
-		    FMusicState := msMusicPlaying;
-	    end
-	    else
-	    begin
-		    FMusicState := msMusicPaused;
-	    end;
-    end;
-  end
-  else if (Key = 'p') or (Key = 'P') then
-  begin
-    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
-    begin
-      case FMusicState of
-        msOff:
-          begin
-            FMusicPlayer.Next;
-            FMusicState := msMusicPlaying;
-          end;
-        msMusicPaused:
-          begin
-            if not FAlarmActive then
-            begin
-              FMusicPlayer.Play;
-              FMusicState := msMusicPlaying;
-            end;
-          end;
-        msSleepPaused:
-          begin
-            if not FAlarmActive then
-            begin
-              FSleepPlayer.Play;
-              FMusicState := msSleepPlaying;
-            end;
-          end;
-        msMusicPlaying:
-          begin
-            FMusicPlayer.Stop;
-            FMusicState := msMusicPaused;
-          end;
-        msSleepPlaying:
-          begin
-            FSleepPlayer.Stop;
-            FMusicState := msSleepPaused;
-          end;
-      end;
-    end;
+    SetMusicSource(msrcMusic);
+
+    if not FAlarmActive then PlayMusic
+    else PauseMusic;
   end
   else if (Key = 's') or (Key = 'S') then
   begin
-    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
-    begin
-	    if not FAlarmActive then
-	    begin
-        FMusicPlayer.Stop;
-		    FSleepPlayer.Next;
-		    FMusicState := msSleepPlaying;
-	    end
-	    else
-	    begin
-		    FMusicState := msSleepPaused;
-	    end;
+    SetMusicSource(msrcSleep);
+
+    if not FAlarmActive then PlayMusic
+    else PauseMusic;
+  end
+  else if (Key = 'd') or (Key = 'D') then
+  begin
+    SetMusicSource(msrcMeditation);
+
+    if not FAlarmActive then PlayMusic
+    else PauseMusic;
+  end
+  else if (Key = 'p') or (Key = 'P') then
+  begin
+    case FMusicState of
+      msPlaying: PauseMusic;
+      else PlayMusic;
     end;
   end
   else if (Key = 'u') or (Key = 'U') then
   begin
-    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
+    if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) and Assigned(FMeditationPlayer) then
     begin
       FMusicPlayer.RescanSearchPath;
 		  FSleepPlayer.RescanSearchPath;
+      FMeditationPlayer.RescanSearchPath;
     end;
   end
   else if (Key = '.') then
@@ -796,7 +836,7 @@ begin
     ShowMessage('Alarm Not Working' + LineEnding
     + 'The package mpg123 was not found on this system.' + LineEnding
     + 'Please install mpg123 to enable the alarm by running the command:' + LineEnding
-    + 'sudo apt-get mpg123');
+    + 'sudo apt-get install mpg123');
 
   if not FileExists(ExtractFilePath(Application.ExeName) + 'alarm.mp3')
     and not FileExists('/usr/share/clock/alarm.mp3') then
@@ -907,6 +947,18 @@ begin
       ChangeFileExt(GetAppConfigFile(False), '_sleep.cfg'), frmClockSettings.edtSleepPath.Text);
   end;
 
+  if not Assigned(FMeditationPlayer) then
+  begin
+    FMeditationPlayer := TPlayer.Create(FMPGPlayer,
+      ChangeFileExt(GetAppConfigFile(False), '_meditation.cfg'), frmClockSettings.edtMeditationPath.Text);
+  end
+  else if FSleepPlayer.SearchPath <> frmClockSettings.edtSleepPath.Text then
+  begin
+    FreeAndNil(FMeditationPlayer);
+    FMeditationPlayer := TPlayer.Create(FMPGPlayer,
+      ChangeFileExt(GetAppConfigFile(False), '_meditation.cfg'), frmClockSettings.edtMeditationPath.Text);
+  end;
+
   if frmClockSettings.cbxGetReminders.Checked then
   begin
     frmReminderList.CanEdit := False;
@@ -947,11 +999,7 @@ begin
 
   Application.ProcessMessages;
 
-  if Assigned(FMusicPlayer) and Assigned(FSleepPlayer) then
-  begin
-    FSleepPlayer.Stop;
-    FMusicPlayer.Stop;
-  end;
+  PauseMusic;
 
   Process := TProcess.Create(nil);
 
