@@ -60,6 +60,7 @@ type
     XMLPropStorage1: TXMLPropStorage;
     procedure btnStartTimerClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyPress(Sender: TObject; var Key: char);
     procedure tmrSettingsTimer(Sender: TObject);
   private
@@ -116,6 +117,32 @@ begin
 {$IFDEF PICSHOW}
   Self.BorderStyle := bsSingle;
 {$ENDIF}
+end;
+
+procedure TfrmClockSettings.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if PageControl1.Focused then
+  begin
+    if Key = 39 then
+    begin
+      if PageControl1.ActivePageIndex = PageControl1.PageCount - 1 then
+        PageControl1.ActivePageIndex := 0
+      else
+        PageControl1.ActivePageIndex := PageControl1.ActivePageIndex + 1;
+
+      Key := 0;
+    end
+    else if Key = 37 then
+    begin
+      if PageControl1.ActivePageIndex = 0 then
+        PageControl1.ActivePageIndex := PageControl1.PageCount - 1
+      else
+        PageControl1.ActivePageIndex := PageControl1.ActivePageIndex - 1;
+
+      Key := 0;
+    end;
+  end;
 end;
 
 

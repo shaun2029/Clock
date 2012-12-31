@@ -9,6 +9,7 @@ object frmClockSettings: TfrmClockSettings
   ClientWidth = 320
   KeyPreview = True
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   Position = poMainFormCenter
   SessionProperties = 'cbxEnableReminders.Checked;cbxFri.Checked;cbxGetReminders.Checked;cbxMon.Checked;cbxPlayMusic.Checked;cbxSat.Checked;cbxSilentAlarm.Checked;cbxSun.Checked;cbxThu.Checked;cbxTue.Checked;cbxWed.Checked;edtHour.Value;edtLocation1.Text;edtLocation2.Text;edtLocation3.Text;edtLocation.Text;edtMinute.Value;edtMusicPath.Text;edtRemHour.Value;edtRemMinute.Value;edtSleepPath.Text;edtMeditationPath.Text'
@@ -22,6 +23,7 @@ object frmClockSettings: TfrmClockSettings
     ParentFont = False
     TabIndex = 0
     TabOrder = 0
+    Options = [nboKeyboardTabSwitch]
     object TabSheet2: TTabSheet
       Caption = 'Timer'
       ClientHeight = 185
@@ -263,14 +265,14 @@ object frmClockSettings: TfrmClockSettings
         Top = 155
         Width = 175
         Caption = 'Play music after alarm'
-        TabOrder = 2
+        TabOrder = 3
       end
       object edtMeditationPath: TEdit
         Left = 110
         Height = 27
         Top = 107
         Width = 184
-        TabOrder = 3
+        TabOrder = 2
         Text = '/home/user/Meditation'
       end
       object Label11: TLabel
