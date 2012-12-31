@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.19';
+  VERSION = '1.0.20';
 
 type
 
@@ -320,7 +320,7 @@ var
   Command: TRemoteCommand;
   Key: Char;
   Player: TPlayer;
-  PlayerName: string;
+  PlayerName, Song: string;
 begin
   Current := Now;
 
@@ -328,7 +328,8 @@ begin
   DecodeDate(Current, Year, Month, Day);
   DayStr := Copy(DayOfWeekStr(Current), 1, 3);
 
-  TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d:%.2d ', [DayStr, Day, Month, H, M, S]);
+  //TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d:%.2d ', [DayStr, Day, Month, H, M, S]);
+  TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d ', [DayStr, Day, Month, H, M]);
 
   if TimeCaption <> lblTime.Caption then
     lblTime.Caption := TimeCaption;
@@ -404,19 +405,23 @@ begin
       else Player := nil;
     end;
 
+    Song := 'Shaun''s Clock Version: ' + VERSION;
+
     if Assigned(Player) then
     begin
       i := Player.Tick;
 
       if i >= 0  then
-        labSong.Caption := Format('Updating %s list ... %d', [PlayerName, i])
+        Song := Format('Updating %s list ... %d', [PlayerName, i])
       else
       begin
         if Player.State = psPlaying then
-          labSong.Caption := Player.SongArtist + ' - ' + Player.SongTitle
-        else labSong.Caption :=  'Shaun''s Clock Version: ' + VERSION;
+          Song := Player.SongArtist + ' - ' + Player.SongTitle;
       end;
     end;
+
+    if labSong.Caption <> Song then
+      labSong.Caption := Song;
 
     tmrTime.Tag := 0;
   end;
@@ -493,10 +498,9 @@ end;
 procedure TfrmClockMain.tmrWeatherTimer(Sender: TObject);
 begin
   tmrWeather.Enabled := False;
-
-  if frmClockSettings.Visible = False then
-    UpdateWeather;
-
+  UpdateWeather;
+  // Every 30 Minutes
+  tmrWeather.Interval := 30 * 60 * 1000;
   tmrWeather.Enabled := True;
 end;
 

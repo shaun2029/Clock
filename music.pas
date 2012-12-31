@@ -120,7 +120,7 @@ procedure TPlayer.Stop;
 begin
   if FState = psPlaying then
   begin
-DebugLn('Music: Stop');
+//DebugLn('Music: Stop');
 
     FState := psStopped;
     StopSong;
@@ -133,7 +133,7 @@ procedure TPlayer.Pause;
 begin
   if FState = psPlaying then
   begin
-DebugLn('Music: Pause');
+//DebugLn('Music: Pause');
 
     FState := psStopped;
     StopSong;
@@ -145,7 +145,7 @@ end;
 
 procedure TPlayer.Play;
 begin
-DebugLn('Music: Play');
+//DebugLn('Music: Play');
 
   FState := psPlaying;
   PlaySong(False);
@@ -155,7 +155,7 @@ end;
 
 procedure TPlayer.Next;
 begin
-DebugLn('Music: Next');
+//DebugLn('Music: Next');
 
   FState := psPlaying;
   PlaySong(True);
@@ -360,7 +360,7 @@ begin
       Result := PathList.Strings[PathIndex]
         + Copy(Result, StartPos + 1, Length(Result));
 
-      DebugLn('GetFileName: Song ' + Result);
+      //DebugLn('GetFileName: Song ' + Result);
     end;
   end
   else Result := '';
