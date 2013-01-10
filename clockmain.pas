@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.20';
+  VERSION = '1.0.21';
 
 type
 
@@ -328,8 +328,8 @@ begin
   DecodeDate(Current, Year, Month, Day);
   DayStr := Copy(DayOfWeekStr(Current), 1, 3);
 
-  //TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d:%.2d ', [DayStr, Day, Month, H, M, S]);
-  TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d ', [DayStr, Day, Month, H, M]);
+  TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d:%.2d ', [DayStr, Day, Month, H, M, S]);
+  //TimeCaption := Format('%s %.2d/%.2d %.2d:%.2d ', [DayStr, Day, Month, H, M]);
 
   if TimeCaption <> lblTime.Caption then
     lblTime.Caption := TimeCaption;
@@ -488,7 +488,12 @@ begin
       end;
     mkAudioNext:
       begin
-        Key := 'm';
+        case FMusicSource of
+          msrcSleep: Key := 's';
+          msrcMeditation: Key := 'd';
+          else Key := 'm';
+        end;
+
         FormKeyPress(Self, Key);
       end;
   end;
@@ -499,8 +504,8 @@ procedure TfrmClockMain.tmrWeatherTimer(Sender: TObject);
 begin
   tmrWeather.Enabled := False;
   UpdateWeather;
-  // Every 30 Minutes
-  tmrWeather.Interval := 30 * 60 * 1000;
+  // Every 60 Minutes
+  tmrWeather.Interval := 60 * 60 * 1000;
   tmrWeather.Enabled := True;
 end;
 

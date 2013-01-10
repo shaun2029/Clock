@@ -29,7 +29,7 @@ type
     FState: TMusicPlayerState;
     FId3: TID3Engine;
     FBufferTime: integer;
-    FPlayLength: integer;
+    FPlayLength: TDateTime;
 
     procedure DestroyPlayProcess;
     procedure EqualizerDefault(Filename: string);
@@ -103,7 +103,7 @@ begin
       if not Assigned(FPlayProcess) then
         StartPlayProcess(FPlayProcess);
 
-      FPlayLength := 0; // used to detect if a play error occurs
+      FPlayLength := Now; // used to detect if a play error occurs
 
       if Trim(FSongTitle) = '' then FSongTitle := ExtractFilename(Song);
       Song := 'LOAD ' + Song + #10;
@@ -180,12 +180,11 @@ begin
       begin
         FState := mpsStopped;
 
-        // Assume that the play process is in an error state if the play time is too short
-        if FPlayLength < 2 then
+        // Assume that the play process is in an error state if the play time is too short < 1 min
+        if (Now - FPlayLength) < EncodeTime(0, 1, 0, 0) then
         begin
           // Kill the play process
           DestroyPlayProcess;
-          // Slow down proceedings
           Sleep(5000);
         end;
       end;
@@ -193,7 +192,6 @@ begin
     else
     begin
       FPlayTimeout := Now + EncodeTime(0, 0, FBufferTime + 1, 0);
-      Inc(FPlayLength);
     end;
 
     FlushStdout;
@@ -224,6 +222,8 @@ procedure TMusicPlayer.DestroyPlayProcess;
 begin
   if Assigned(FPlayProcess) then
   begin
+    FState := mpsStopped;
+
     if FPlayProcess.Running then
     begin
       FPlayProcess.Terminate(1);
