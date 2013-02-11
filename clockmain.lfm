@@ -468,7 +468,6 @@ object frmClockMain: TfrmClockMain
     top = 80
   end
   object tmrMinute: TTimer
-    Enabled = False
     Interval = 60000
     OnTimer = tmrMinuteTimer
     left = 144

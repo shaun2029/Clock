@@ -185,7 +185,6 @@ begin
         begin
           // Kill the play process
           DestroyPlayProcess;
-          Sleep(5000);
         end;
       end;
     end

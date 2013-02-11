@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.21';
+  VERSION = '1.0.22';
 
 type
 
@@ -86,6 +86,7 @@ type
     FTimer: TAlarm;
     FSyncServer: TSyncServer;
     FSyncClient: TSyncClient;
+    FAfterAlarmResumeMusic: boolean;
 
     Images: array [0..4] of TImage;
     ImageURLs: array [0..4] of string;
@@ -124,6 +125,7 @@ type
     procedure Shutdown(Reboot: boolean);
     procedure UpdateSettings;
     procedure UpdateWeather;
+    procedure UpdateReminders;
 
     procedure BeforeAlarm;
     procedure AfterAlarm;
@@ -262,30 +264,27 @@ end;
 procedure TfrmClockMain.BeforeAlarm;
 begin
   FAlarmActive := True;
+  FAfterAlarmResumeMusic := FMusicState = msPlaying;
   PauseMusic;
-
-  // Play music after alarm
-  if frmClockSettings.cbxPlayMusic.Checked then
-    FMusicState := msPaused;
 end;
 
 procedure TfrmClockMain.AfterAlarm;
 begin
   // Possibly start music after alarm
-  if FMusicSource <> msrcNone then
+  if frmClockSettings.cbxPlayMusic.Checked or FAfterAlarmResumeMusic then
   begin
-    case FMusicState of
-      msPaused:
+    case FMusicSource of
+      msrcSleep: FSleepPlayer.Play;
+      msrcMusic: FMusicPlayer.Play;
+      msrcMeditation: FMeditationPlayer.Play;
+      else
       begin
-        case FMusicSource of
-          msrcSleep: FSleepPlayer.Play;
-          msrcMusic: FMusicPlayer.Play;
-          msrcMeditation: FMeditationPlayer.Play;
-        end;
-
-        FMusicState := msPlaying;
+        SetMusicSource(msrcMusic);
+        FMusicPlayer.Play;
       end;
     end;
+
+    FMusicState := msPlaying;
   end;
 
   FAlarmActive := False;
@@ -516,8 +515,7 @@ var
 begin
   tmrMinute.Enabled := False;
 
-  frmReminders.RefreshReminders;
-
+  // Reminders
   if tmrMinute.Tag >= 5 then
   begin
     tmrMinute.Tag := 0;
@@ -548,6 +546,9 @@ begin
         frmReminders.ReadReminders;
       end;
     end;
+
+    frmReminders.RefreshReminders;
+    UpdateReminders;
   end
   else tmrMinute.Tag := tmrMinute.Tag + 1;
 
@@ -957,17 +958,6 @@ begin
 
   FAlarm.Silent := frmClockSettings.cbxSilentAlarm.Checked;
 
-  if frmClockSettings.cbxEnableReminders.Checked then
-    FCurrentReminders := frmReminders.GetCurrentReminders
-  else SetLength(FCurrentReminders, 0);
-
-  // Reminders
-  for i := 1 to 7 do
-    FReminderAlarm.Days[i] := Length(FCurrentReminders) > 0;
-
-  FReminderAlarm.AlarmTime := Date + EncodeTime(frmClockSettings.edtRemHour.Value,
-    frmClockSettings.edtRemMinute.Value, 0, 0);
-
   if frmClockSettings.TimerActive then
   begin
     for i := 0 to High(FTimer.Days) do
@@ -1034,6 +1024,24 @@ begin
   begin
     SetMusicSource(FMusicSource);
   end;
+
+  UpdateReminders;
+end;
+
+procedure TfrmClockMain.UpdateReminders;
+var
+  i: Integer;
+begin
+  if frmClockSettings.cbxEnableReminders.Checked then
+    FCurrentReminders := frmReminders.GetCurrentReminders
+  else SetLength(FCurrentReminders, 0);
+
+  // Reminders
+  for i := 1 to 7 do
+    FReminderAlarm.Days[i] := Length(FCurrentReminders) > 0;
+
+  FReminderAlarm.AlarmTime := Date + EncodeTime(frmClockSettings.edtRemHour.Value,
+    frmClockSettings.edtRemMinute.Value, 0, 0);
 end;
 
 procedure TfrmClockMain.Shutdown(Reboot: boolean);
