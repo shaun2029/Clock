@@ -10,7 +10,7 @@ unit MusicPlayer;
 interface
 
 uses
-  Classes, SysUtils, Process, ID3Engine, LCLProc;
+  Classes, SysUtils, Process, ID3v1Library, ID3v2Library, LCLProc;
 
 type
 
@@ -27,7 +27,6 @@ type
     FSongArtist: string;
     FSongTitle: string;
     FState: TMusicPlayerState;
-    FId3: TID3Engine;
     FBufferTime: integer;
     FPlayLength: TDateTime;
 
@@ -75,27 +74,47 @@ const
 implementation
 
 procedure TMusicPlayer.PlaySong(Song: string);
+var
+  ID3v1: TID3v1Tag;
+  ID3v2: TID3v2Tag;
 begin
   // Ensure that song is not playing
   StopSong;
 
+  FSongTitle := '';
+  FSongArtist := '';
+
+  ID3v1 := TID3v1Tag.Create;
+  ID3v2 := TID3v2Tag.Create;
+
   try
-    FId3.Active := False;
-    FId3.FileName := Song;
-    FId3.Active := True;
-    FSongArtist := FId3.Artist;
-    FSongTitle := FId3.Title;
-    FId3.Active := False;
+    if ID3v2.LoadFromFile(Song) = ID3V2LIBRARY_SUCCESS then
+    begin
+      //* Get Title
+      FSongTitle := ID3v2.GetUnicodeText('TIT2');
+
+      //* Get Artist
+      FSongArtist := ID3v2.GetUnicodeText('TPE1');
+    end
+    else if ID3v1.LoadFromFile(Song) = ID3V1LIBRARY_SUCCESS then
+    begin
+      //* Get Title
+      FSongTitle := ID3v1.Title;
+
+      //* Get Artist
+      FSongArtist := ID3v1.Artist;
+    end;
   except
     on E: Exception do
     begin
-      FSongTitle := '';
-
       DebugLn(Self.ClassName + #9#9 + 'Failed to get ID3 Tags for "'
         + ExtractFilename(Song) + '"');
       DebugLn(Self.ClassName + #9#9 + E.Message);
     end;
   end;
+
+  ID3v1.Free;
+  ID3v2.Free;
 
   try
     if FileExists(Song) then
@@ -235,8 +254,6 @@ end;
 constructor TMusicPlayer.Create;
 begin
   FPlayProcess := nil;
-  FId3 := TID3Engine.Create(nil);
-  FId3.ReadingOnly := True;
   FEqualizer := '';
   FVolume := 100;
 end;
@@ -244,11 +261,6 @@ end;
 destructor TMusicPlayer.Destroy;
 begin
   DestroyPlayProcess;
-
-  try
-    FId3.Free;
-  except
-  end;
 
   inherited Destroy;
 end;
