@@ -534,7 +534,8 @@ Uses
     SysUtils,
     //Dialogs,
     //ZLibEx,
-    ZLib;
+//    ZLib,
+    LConvEncoding;
 
 function MakeInt64(LowDWord, HiDWord: DWord): Int64;
 begin
@@ -2303,7 +2304,7 @@ begin
                 Frames[FrameIndex].Stream.Read(PASCIIText^, Frames[FrameIndex].Stream.Size - Frames[FrameIndex].Stream.Position);
                 AnsiText := PASCIIText;
                 FreeMem(PASCIIText);
-                Result := AnsiText;
+                Result := ISO_8859_1ToUTF8(AnsiText);
             end;
             //* UTF-16
             1: begin
@@ -2313,7 +2314,7 @@ begin
                     if DataByte = $FE then begin
                         PUText := AllocMem(Frames[FrameIndex].Stream.Size - 2 + 2);
                         Frames[FrameIndex].Stream.Read(PUText^, Frames[FrameIndex].Stream.Size - Frames[FrameIndex].Stream.Position);
-                        Result := PUText;
+                        Result := UTF8Encode(WideString(PUText));
                         FreeMem(PUText);
                     end;
                 end;
@@ -2322,18 +2323,15 @@ begin
             2: begin
                 PUText := AllocMem(Frames[FrameIndex].Stream.Size - 1 + 2);
                 Frames[FrameIndex].Stream.Read(PUText^, Frames[FrameIndex].Stream.Size - Frames[FrameIndex].Stream.Position);
-                Result := PUText;
+                Result := UTF8Encode(WideString(PUText));
                 FreeMem(PUText);
             end;
             //* UTF-8
             3: begin
                 PASCIIText := AllocMem(Frames[FrameIndex].Stream.Size - Frames[FrameIndex].Stream.Position + 1);
                 Frames[FrameIndex].Stream.Read(PASCIIText^, Frames[FrameIndex].Stream.Size - Frames[FrameIndex].Stream.Position);
-                PUText := AllocMem((Length(PASCIIText) + 1) * 2);
-                Utf8ToUnicode(PUText, Length(PASCIIText) * 2, PANSIChar(PASCIIText), Length(PASCIIText));
-                Result := PUText;
+                Result := PASCIIText;
                 FreeMem(PASCIIText);
-                FreeMem(PUText);
             end;
             else begin
                 Frames[FrameIndex].Stream.Seek(0, soBeginning);
