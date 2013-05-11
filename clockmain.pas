@@ -23,7 +23,7 @@ uses
   X, Xlib, CTypes;
 
 const
-  VERSION = '1.0.23';
+  VERSION = '1.0.24';
 
 type
 
@@ -401,7 +401,11 @@ begin
           Player := FMusicPlayer;
           PlayerName := 'music';
         end;
-      else Player := nil;
+      else
+      begin
+        Player := nil;
+        SetMusicSource(msrcMusic);
+      end;
     end;
 
     Song := 'Shaun''s Clock Version: ' + VERSION;
