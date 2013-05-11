@@ -6,11 +6,12 @@
 unit udpserver;
 
 {$mode objfpc}{$H+}
+// {$DEFINE DEBUG}
 
 interface
 
 uses
-  Classes, SysUtils, LCLProc,
+  Classes, SysUtils, LCLProc, SyncObjs,
 
   // synapse
   blcksock;
@@ -20,15 +21,18 @@ type
   { TUDPServerThread }
 
   TUDPServerThread = class(TThread)
-  private
-    procedure Log(Message: string);
   protected
     FData: TStringList;
 
     procedure Execute; override;
   public
+    Critical: TCriticalSection;
+
     constructor Create(Data: string);
     destructor Destroy; override;
+
+  published
+    property Data: TStringList read FData;
   end;
 
   TUDPServer = class
@@ -40,11 +44,18 @@ type
 
     function GetRunning: Boolean;
   public
+    constructor Create;
+
     procedure Send(Data: string);
     property Running: Boolean read GetRunning;
   end;
 
 implementation
+
+procedure Log(Message: string);
+begin
+  DebugLn(Message);
+end;
 
 { TUDPServer }
 
@@ -53,10 +64,21 @@ begin
   Result := FUDPServerThread <> nil;
 end;
 
+constructor TUDPServer.Create;
+begin
+  FUDPServerThread := nil;
+end;
+
 procedure TUDPServer.Send(Data: string);
 begin
-  Stop;
-  Start(Data);
+  if FUDPServerThread = nil then
+    Start(Data)
+  else
+  begin
+    FUDPServerThread.Critical.Enter;
+    FUDPServerThread.Data.Text := Data;
+    FUDPServerThread.Critical.Leave;
+  end;
 end;
 
 procedure TUDPServer.Start(Data: string);
@@ -85,6 +107,8 @@ var
   Total: integer;
   PakNo: integer;
 begin
+  {$IFDEF DEBUG} Log('UPDSRV: Running ...'); {$ENDIF}
+
   Socket := TUDPBlockSocket.Create;
   try
     Socket.Bind('0.0.0.0', '44559');
@@ -106,12 +130,16 @@ begin
           begin
             if Buffer = 'REQUEST REMINDERS' then
             begin
-              Total := FData.Count;
+              {$IFDEF DEBUG} Log('UPDSRV: Received REQUEST REMINDERS ...'); {$ENDIF}
 
-			        // Send packet with reminder total
+              Critical.Enter;
+              Total := FData.Count;
+              DataBuff := FData.Text;
+              Critical.Leave;
+
+              // Send packet with reminder total
               Socket.SendString('REMINDERS:' + IntToStr(Total));
 
-              DataBuff := FData.Text;
               Pos := 1;
               PakNo := 1;
 
@@ -124,12 +152,10 @@ begin
                 Inc(Pos, 500);
                 Inc(PakNo);
               end;
+
+              {$IFDEF DEBUG} Log('UPDSRV: Sent REMINDERS ...'); {$ENDIF}
             end;
           end;
-
-          // minimal sleep
-          if Buffer = '' then
-            Sleep(10);
         end;
       finally
         Socket.CloseSocket;
@@ -138,12 +164,15 @@ begin
   finally
     Socket.Free;
   end;
+
+  {$IFDEF DEBUG} Log('UPDSRV: Stopped ...'); {$ENDIF}
 end;
 
 constructor TUDPServerThread.Create(Data: string);
 begin
   inherited Create(False);
 
+  Critical := TCriticalSection.Create;
   FData := TStringList.Create;
   FData.Text := Data;
 end;
@@ -151,13 +180,9 @@ end;
 destructor TUDPServerThread.Destroy;
 begin
   FData.Free;
+  Critical.Free;
 
   inherited Destroy;
-end;
-
-procedure TUDPServerThread.Log(Message: string);
-begin
-  DebugLn(Self.ClassName + #9#9 + Message);
 end;
 
 end.
